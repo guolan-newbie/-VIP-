@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="mapper.SocialMapper">	
+    <select id="getSocialsByPage" parameterType="dto.SocialDTO" resultType="entity.Social">
+	SELECT 
+			social.uid,mid,realname,sex,school,phone,qq,student,graduateDate,age,social.pname,social.psname,pic.id pid,social.flag
+	FROM
+			(	SELECT 
+			uid,mid,socialme.name realname,sex,school,phone,qq,student,graduateDate,flag,age,p.name pname,ps.name psname
+	FROM
+			(
+					SELECT
+							m.uid,m.id mid,m.name name,sex,school,m.mobile phone,i.qqNo qq,student,graduateDate,1 flag,m.provid provid,seat_provid,
+							year(curdate())-if(length(i.idNo)=18,substring(i.idNo,7,4),if(length(i.idNo)=15,concat('19',substring(i.idNo,7,2)),null))  age
+					FROM
+							member m 
+					LEFT JOIN
+							userinfo i
+					ON
+							m.uid = i.uid
+			)socialme
+	LEFT JOIN province p on socialme.provid=p.id
+	LEFT JOIN province ps ON seat_provid = ps.id
+			)social
+	LEFT JOIN picture pic on social.uid=pic.uid
+${sql1}
+<!-- UNION
+		SELECT
+			socialex.id id,socialex.name name,sex,school,phone,qq,student,graduateDate,flag,age,pname,ps.name psname
+		FROM(
+			SELECT
+					 e.id id,e.name name,sex,school,phone,'无' qq,student,graduateDate,flag,0 age,p.name pname,seat_provid
+			FROM
+					 experience e
+			LEFT JOIN province p on e.province=p.id 
+		)socialex
+	LEFT JOIN
+	province ps
+	ON
+	seat_provid = ps.id
+${sql2} -->
+    </select>
+</mapper>

@@ -1,0 +1,546 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="mapper.ExperienceMapper">
+	<select id="getNum" resultType="String">
+		SELECT num from experience order
+		by num desc limit 1
+	</select>
+	<delete id="delete" parameterType="int">
+		DELETE FROM experience WHERE id=#{id}
+	</delete>
+
+	<!-- * 修改：添加出生地seat_provid * 作者：王德斌 * 日期：2016-10-13 -->
+	<select id="getLastOne" resultType="entity.User">
+		select * from `experience`
+		order by id desc limit 1
+	</select>
+	<!-- *作者:陈家豪 *日期:2017-4-6 * -->
+	<update id="update" parameterType="entity.Experience">
+		update experience set
+		num = #{num},
+		password = #{password},
+		salt = #{salt},
+		name = #{name},
+		sex = #{sex},
+		phone = #{phone},
+		student = #{student},
+		school = #{school},
+		company = #{company},
+		graduateDate = #{graduateDate},
+		province = #{province},
+		seat_provid=#{seat_provid},
+		endtime = #{endtime},
+		noticeTime=#{noticeTime},
+		aid = #{aid},
+		flag = #{flag},
+		memo = #{memo},
+		summaryflag = #{summaryflag}
+		where id = #{id}
+	</update>
+
+
+	<insert id="add" parameterType="entity.Experience"
+		useGeneratedKeys="true" keyProperty="id">
+		insert into
+		experience(num,password,salt,name,sex,phone,qq,student,school,company,graduateDate,province,begintime,endtime,noticeTime,aid,flag,memo,seat_provid)
+		values
+		(#{num},#{password},#{salt},#{name},#{sex},#{phone},#{qq},#{student},#{school},#{company},#{graduateDate},#{province},#{begintime},#{endtime},#{noticeTime},#{aid},#{flag},#{memo},#{seat_provid})
+	</insert>
+	<select id="checkExists" parameterType="String" resultType="int">
+		SELECT COUNT(*) FROM experience WHERE num=#{num}
+	</select>
+	<select id="getSaltByNum" parameterType="String" resultType="String">
+		select salt from experience where num=#{num}
+	</select>
+	<select id="getUidById" parameterType="int" resultType="Integer">
+		SELECT
+		u.id from(
+		select m.uid muid
+		from experience e,member m
+		where e.id=m.eid and e.id=#{id}) tablea,user u
+		WHERE tablea.muid=u.id
+	</select>
+	<select id="countExperienceUid" parameterType="int" resultType="Integer">
+		SELECT count(u.id) from(
+		select m.uid muid
+		from experience e,member m
+		where e.id=m.eid and e.id=#{id}) tablea,user u
+		WHERE tablea.muid=u.id
+	</select>
+	<select id="getMidById" parameterType="int" resultType="int">
+		select
+		m.id from experience e,member m where e.id=m.eid and e.id=#{id}
+	</select>
+	<select id="isValid" resultType="entity.Experience"
+		parameterType="entity.Experience">
+		select * from experience where num=#{num} and
+		`password`=#{password}
+	</select>
+
+	<!-- * 修改：添加出生地seat_provid * 作者：王德斌 * 日期：2016-10-13 -->
+	<select id="getExperienceById" resultMap="experience"
+		parameterType="int">
+		SELECT
+		e.id eid,
+		num,
+		password,
+		e.salt esalt,
+		e.`name` ename,
+		sex,
+		phone,
+		student,
+		school,
+		company,
+		graduateDate,
+		province,
+		seat_provid,
+		begintime,
+		endtime,
+		noticeTime,
+		flag,
+		memo,
+		qq,
+		e.summaryflag esummaryflag,
+		e.aid eaid,
+		a.id aid,
+		a.realname arealname
+		FROM experience e
+		LEFT JOIN admin a
+		ON e.aid=a.id
+		WHERE e.id=#{id}
+	</select>
+
+	<!-- * 修改：添加出生地seat_provid * 作者：王德斌 * 日期：2016-10-13 -->
+	<select id="getExperienceByPage" resultMap="experience"
+		parameterType="dto.ExperienceDTO">
+		SELECT
+		tablea.eid eid,
+		tablea.num num,
+		tablea.password password,
+		tablea.esalt esalt,
+		tablea.`ename` ename,
+		tablea.sex sex,
+		tablea.phone phone,
+		tablea.student
+		student,
+		tablea.school school,
+		tablea.company company,
+		tablea.graduateDate graduateDate,
+		tablea.province province,
+		tablea.seat_provid seat_provid,
+		tablea.begintime begintime,
+		tablea.endtime endtime,
+		tablea.noticeTime noticeTime,
+		tablea.flag flag,
+		tablea.memo memo,
+		tablea.eaid eaid,
+		tablea.esummaryflag esummaryflag,
+		tablea.aid aid,
+		tablea.arealname arealname,
+		tableb.uname uname
+		from(
+		SELECT
+		e.id eid,
+		num,
+		password,
+		e.salt esalt,
+		e.`name` ename,
+		sex,
+		phone,
+		student,
+		school,
+		company,
+		graduateDate,
+		province,
+		seat_provid,
+		begintime,
+		endtime,
+		noticeTime,
+		flag,
+		memo,
+		e.aid eaid,
+		e.summaryflag esummaryflag,
+		a.id aid,
+		a.realname arealname
+		FROM experience e
+		LEFT JOIN admin a
+		ON e.aid=a.id) tablea
+		LEFT JOIN
+		(SELECT
+		m.eid meid,
+		u.name uname
+		from
+		member m,user u
+		WHERE m.uid=u.id) tableb
+		ON tablea.eid=tableb.meid
+		ORDER BY num desc
+	</select>
+
+	<select id="getExperienceByPinyin" resultType="entity.Experience">
+		select id,name
+		from experience GROUP BY num
+	</select>
+
+
+
+	<!-- * 修改：添加出生地seat_provid * 作者：王德斌 * 日期：2016-10-13 -->
+	<resultMap type="entity.Experience" id="experience">
+		<id column="eid" property="id" />
+		<result column="num" property="num" />
+		<result column="password" property="password" />
+		<result column="esalt" property="salt" />
+		<result column="ename" property="name" />
+		<result column="sex" property="sex" />
+		<result column="phone" property="phone" />
+		<result column="student" property="student" />
+		<result column="school" property="school" />
+		<result column="company" property="company" />
+		<result column="graduateDate" property="graduateDate" />
+		<result column="province" property="province" />
+		<result column="seat_provid" property="seat_provid" />
+		<result column="begintime" property="begintime" />
+		<result column="endtime" property="endtime" />
+		<result column="noticeTime" property="noticeTime" />
+		<result column="flag" property="flag" />
+		<result column="memo" property="memo" />
+		<result column="eaid" property="aid" />
+		<result column="qq" property="qq" />
+		<result column="esummaryflag" property="summaryflag" />
+		<association property="admin" javaType="entity.Admin">
+			<id column="aid" property="id" />
+			<result column="arealname" property="realname" />
+		</association>
+		<association property="user" javaType="entity.User">
+			<result column="uname" property="name" />
+		</association>
+	</resultMap>
+
+	<!-- * 功能:体验者的加入、退出、预科 * 作者:陈家豪 * 日期:2017-03-31 -->
+	<select id="getExperienceInByPage" resultMap="experiencein"
+		parameterType="dto.ExperienceDTO">
+		SELECT
+		tablea.eid eid,
+		tablea.num num,
+		tablea.password password,
+		tablea.esalt esalt,
+		tablea.`ename` ename,
+		tablea.sex sex,
+		tablea.phone phone,
+		tablea.student
+		student,
+		tablea.school school,
+		tablea.company company,
+		tablea.graduateDate graduateDate,
+		tablea.province province,
+		tablea.seat_provid seat_provid,
+		tablea.begintime begintime,
+		tablea.endtime endtime,
+		tablea.noticeTime noticeTime,
+		tablea.flag flag,
+		tablea.memo memo,
+		tablea.eaid eaid,
+		tablea.esummaryflag esummaryflag,
+		tablea.aid aid,
+		tablea.arealname arealname,
+		tableb.uname uname
+		from(
+		SELECT
+		e.id eid,
+		num,
+		password,
+		e.salt esalt,
+		e.`name` ename,
+		sex,
+		phone,
+		student,
+		school,
+		company,
+		graduateDate,
+		province,
+		seat_provid,
+		begintime,
+		endtime,
+		noticeTime,
+		flag,
+		memo,
+		e.aid eaid,
+		e.summaryflag esummaryflag,
+		a.id aid,
+		a.realname arealname
+		FROM experience e
+		LEFT JOIN admin a
+		ON e.aid=a.id
+		WHERE
+		e.flag=#{flag} and endTime is not null ) tablea
+		LEFT JOIN
+		(SELECT
+		m.eid meid,
+		u.name uname
+		from
+		member m,user u
+		WHERE m.uid=u.id) tableb
+		ON tablea.eid=tableb.meid
+		ORDER BY num desc
+	</select>
+
+	<!-- * * 作者：陈家豪 * 日期：2017-03-31 -->
+	<resultMap type="entity.Experience" id="experiencein">
+		<id column="eid" property="id" />
+		<result column="num" property="num" />
+		<result column="password" property="password" />
+		<result column="esalt" property="salt" />
+		<result column="ename" property="name" />
+		<result column="sex" property="sex" />
+		<result column="phone" property="phone" />
+		<result column="student" property="student" />
+		<result column="school" property="school" />
+		<result column="company" property="company" />
+		<result column="graduateDate" property="graduateDate" />
+		<result column="province" property="province" />
+		<result column="seat_provid" property="seat_provid" />
+		<result column="begintime" property="begintime" />
+		<result column="endtime" property="endtime" />
+		<result column="noticeTime" property="noticeTime" />
+		<result column="flag" property="flag" />
+		<result column="memo" property="memo" />
+		<result column="eaid" property="aid" />
+		<result column="qq" property="qq" />
+		<result column="esummaryflag" property="summaryflag" />
+		<association property="admin" javaType="entity.Admin">
+			<id column="aid" property="id" />
+			<result column="arealname" property="realname" />
+		</association>
+		<association property="user" javaType="entity.User">
+			<result column="uname" property="name" />
+		</association>
+	</resultMap>
+
+
+
+	<!-- * 功能:正在体验的体验者 * 作者:陈家豪 * 日期:2017-03-31 -->
+	<select id="getExperienceIngByPage" resultMap="experienceing"
+		parameterType="dto.ExperienceDTO">
+		SELECT
+		tablea.eid eid,
+		tablea.num num,
+		tablea.password password,
+		tablea.esalt esalt,
+		tablea.`ename` ename,
+		tablea.sex sex,
+		tablea.phone phone,
+		tablea.student
+		student,
+		tablea.school school,
+		tablea.company company,
+		tablea.graduateDate graduateDate,
+		tablea.province province,
+		tablea.seat_provid seat_provid,
+		tablea.begintime begintime,
+		tablea.endtime endtime,
+		tablea.noticeTime noticeTime,
+		tablea.flag flag,
+		tablea.memo memo,
+		tablea.eaid eaid,
+		tablea.esummaryflag esummaryflag,
+		tablea.aid aid,
+		tablea.arealname arealname,
+		tableb.uname uname
+		from(
+		SELECT
+		e.id eid,
+		num,
+		password,
+		e.salt esalt,
+		e.`name` ename,
+		sex,
+		phone,
+		student,
+		school,
+		company,
+		graduateDate,
+		province,
+		seat_provid,
+		begintime,
+		endtime,
+		noticeTime,
+		flag,
+		memo,
+		e.aid eaid,
+		e.summaryflag esummaryflag,
+		a.id aid,
+		a.realname arealname
+		FROM experience e
+		LEFT JOIN admin a
+		ON e.aid=a.id
+		WHERE
+		endTime is null ) tablea
+		LEFT JOIN
+		(SELECT
+		m.eid meid,
+		u.name uname
+		from
+		member m,user u
+		WHERE m.uid=u.id) tableb
+		ON tablea.eid=tableb.meid
+		ORDER BY num desc
+	</select>
+
+	<resultMap type="entity.Experience" id="experienceing">
+		<id column="eid" property="id" />
+		<result column="num" property="num" />
+		<result column="password" property="password" />
+		<result column="esalt" property="salt" />
+		<result column="ename" property="name" />
+		<result column="sex" property="sex" />
+		<result column="phone" property="phone" />
+		<result column="student" property="student" />
+		<result column="school" property="school" />
+		<result column="company" property="company" />
+		<result column="graduateDate" property="graduateDate" />
+		<result column="province" property="province" />
+		<result column="seat_provid" property="seat_provid" />
+		<result column="begintime" property="begintime" />
+		<result column="endtime" property="endtime" />
+		<result column="noticeTime" property="noticeTime" />
+		<result column="flag" property="flag" />
+		<result column="memo" property="memo" />
+		<result column="eaid" property="aid" />
+		<result column="qq" property="qq" />
+		<result column="esummaryflag" property="summaryflag" />
+		<association property="admin" javaType="entity.Admin">
+			<id column="aid" property="id" />
+			<result column="arealname" property="realname" />
+		</association>
+		<association property="user" javaType="entity.User">
+			<result column="uname" property="name" />
+		</association>
+	</resultMap>
+
+	<select id="getExperienceList" resultMap="experienceList">
+		SELECT
+		e.id,
+		e.num,
+		e. name,
+		e.qq,
+		e.school,
+		e.student,
+		e.beginTime,
+		e.endTime,
+		e.flag,
+		e.endTime,
+		u.`name` AS uname,
+		a.realname
+		FROM
+		experience AS e
+		LEFT JOIN member AS m ON e.id = m.eid
+		LEFT JOIN `user` AS u ON
+		m.uid = u.id
+		LEFT JOIN admin a ON a.id=e.aid
+		WHERE
+		1=1
+		<if test="status==1 ">
+			and e.flag=1
+		</if>
+		<if test="status==2 ">
+			and ISNULL(e.endTime)
+		</if>
+		<if test="status==3 ">
+			and e.flag=0 and e.endTime is not null
+		</if>
+		<if test="status==4 ">
+			and e.flag=2
+		</if>
+		<if test="qq!=''">
+			and e.qq LIKE #{qq}
+		</if>
+		<if test="aId!=0">
+			and e.aid=#{aId}
+		</if>
+		ORDER BY e.id desc
+	</select>
+	<resultMap type="entity.Experience" id="experienceList">
+		<id column="id" property="id" />
+		<result column="num" property="num" />
+		<result column="name" property="name" />
+		<result column="qq" property="qq" />
+		<result column="school" property="school" />
+		<result column="student" property="student" />
+		<result column="beginTime" property="begintime" />
+		<result column="endTime" property="endtime" />
+		<result column="flag" property="flag" />
+		<result column="endTime" property="endtime" />
+		<collection property="user" ofType="entity.User">
+			<result property="name" column="uname" />
+		</collection>
+		<collection property="admin" ofType="entity.Admin">
+			<result property="realname" column="realname" />
+		</collection>
+	</resultMap>
+
+	<!-- * 功能:月入会员信息 * 作者:陈家豪 * 日期:2017-5-4 -->
+	<select id="getMemberByMonth" resultMap="memberMonth">
+		SELECT
+		m.id,
+		u.name uname,
+		m.name,
+		m.sex,
+		m.school,
+		m.time,
+		a.realname,
+		p.firstamount,
+		p.secondamount
+		FROM
+		member m
+		LEFT JOIN user u ON u.id=m.uid
+		LEFT JOIN admin a ON a.id=m.aid
+		LEFT
+		JOIN
+		(SELECT A.mid
+		,SUM(case when p1.id-A.pid=0 then p1.amount else 0 end) as firstamount
+		,SUM(case when p1.id-A.pid=1 then p1.amount else 0 end) as
+		secondamount
+		from (select p0.mid,min(p0.id) as pid
+		from period p0
+		GROUP BY p0.mid
+		) A
+		left join period p1 on A.mid =p1.mid
+		group by A.mid) AS p ON p.mid = m.id
+		where YEAR (m.time) = #{years}
+		AND MONTH
+		(m.time) = #{month}
+		ORDER BY m.time DESC
+	</select>
+	<resultMap type="entity.Member" id="memberMonth">
+		<id column="id" property="id" />
+		<result column="name" property="name" />
+		<result column="sex" property="sex" />
+		<result column="school" property="school" />
+		<result column="time" property="time" />
+		<collection property="user" ofType="entity.User">
+			<result property="name" column="uname" />
+		</collection>
+		<collection property="admin" ofType="entity.Admin">
+			<result column="realname" property="realname" />
+		</collection>
+		<collection property="period" ofType="entity.Period">
+			<result column="firstamount" property="amount" />
+			<result column="secondamount" property="restAmount" />
+		</collection>
+<!-- 		<association property="period" javaType="entity.Period" > -->
+<!-- 			<result column="amount" property="firstamount" /> -->
+<!-- 			<result column="restAmount" property="secondamount" /> -->
+<!-- 		</association> -->
+	</resultMap>
+
+
+
+
+
+
+
+
+
+
+</mapper>

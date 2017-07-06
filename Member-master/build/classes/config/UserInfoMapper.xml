@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="mapper.UserInfoMapper">
+	<update id="update" parameterType="entity.UserInfo">
+		update userinfo set idNo=#{idNo},qqNo=#{qqNo},payAccount=#{payAccount},contactName=#{contactName},contactMobile=#{contactMobile},relation=#{relation},address=#{address} where uid=#{uid}
+	</update>		
+	<insert id="add" parameterType="entity.UserInfo"  useGeneratedKeys="true" keyProperty="id">
+		insert into userinfo (uid,idNo,qqNo,payAccount,contactName,contactMobile,relation,address) 
+		values 
+		(#{uid},#{idNo},#{qqNo},#{payAccount},#{contactName},#{contactMobile},#{relation},#{address})
+	</insert>
+	<select id="get" parameterType="entity.UserInfo" resultType="entity.UserInfo">
+		select * from userinfo where uid=#{uid}
+	</select>
+	<delete id="deleteByUid" parameterType="int">	
+		delete from userinfo WHERE userinfo.uid=#{id}
+	</delete>
+	<select id="getUserInfoByUid" parameterType="int" resultType="entity.UserInfo">
+		select * from userinfo where uid=#{uid}
+	</select>
+</mapper>

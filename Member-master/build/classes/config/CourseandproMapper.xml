@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="mapper.CourseandproMapper">	
+	<update id="update" parameterType="entity.Courseandpro">
+		update courseandpro set meid=#{meid},identityType=#{identityType},caid=#{caid},chorder=#{chorder},corder=#{corder} ,proportion=#{proportion}
+		where id=#{id} 
+	</update>	
+	<insert id="add" parameterType="entity.Courseandpro"  useGeneratedKeys="true" keyProperty="id">
+		insert into courseandpro(meid,identityType,caid,chorder,corder,proportion) values (#{meid},#{identityType},#{caid},#{chorder},#{corder},#{proportion})
+	</insert>	
+	<select id="exists" parameterType="entity.Courseandpro" resultType="entity.Courseandpro">
+		select * from courseandpro where meid=#{meid} and identityType=#{identityType} and caid=#{caid}
+	</select>
+	<select id="getcourseandproByCid" parameterType="int" resultType="entity.Courseandpro">
+		select * from courseandpro where cid=#{cid}
+	</select>
+	<select id="getmyCid" parameterType="int" resultType="double">
+		select count(*) from courseandpro where uid=#{uid}
+	</select>
+	<select id="getCourseandproByPage" parameterType="dto.CourseandproDTO" resultMap="courseandpro">
+	SELECT 
+tableb.id id,
+tableb.num num,
+tableb.name name,
+tableb.aid aid,
+a.realname realname,
+tableb.identityType identityType
+ from(
+			SELECT 
+			v.id id,
+			v.num num,
+			v.name name,
+			v.aid aid,
+			v.identityType identityType
+			from `v_mem&amp;exp` v 
+			)tableb
+LEFT JOIN admin a
+ON tableb.aid=a.id
+order by tableb.num
+	</select>	
+	<select id="getCategoryCourseandproByPage" parameterType="dto.CourseandproDTO" resultMap="categorycourseandpro">
+		SELECT 
+		tablea.id id,
+		tablea.meid meid,
+		tablea.identityType identityType,
+		tablea.proportion proportion,
+		tablea.caid caid,
+		tablea.num num,
+		tablea.name name,
+		tablea.aid aid,
+		a.realname realname
+		 FROM
+		(SELECT 
+		cap.id id,
+		cap.meid meid,
+		cap.identityType identityType,
+		cap.proportion proportion,
+		cap.caid caid,
+		v.num num,
+		v.name name,
+		v.aid aid 
+		from courseandpro cap,`v_mem&amp;exp` v 
+		WHERE caid=#{caid} 
+		and cap.meid=v.id 
+		and cap.identityType=v.identityType)tablea 
+		LEFT JOIN admin a
+		ON tablea.aid=a.id
+		ORDER BY num
+	</select>	
+	<select id = "getCourseandproNum" parameterType = "entity.Courseandpro" resultType = "int">
+		select sum(corder) from courseandpro where meid=#{meid} and caid = #{caid}
+	</select>
+	<select id = "getStudentCategory" parameterType = "entity.StudentAndProcess" resultType = "entity.StudentAndProcess">
+		SELECT * FROM v_studentandprocess WHERE meid=#{meid} and identityType=#{identityType}
+	</select>
+	<select id = "getStudentLearnedCategory" parameterType = "entity.StudentAndProcess" resultType = "entity.StudentAndProcess">
+		SELECT * FROM v_studentandprocess WHERE meid=#{meid} and identityType=#{identityType} and capid is not null
+	</select>
+	<delete id = "deleteByCaid" parameterType = "entity.Courseandpro">
+		DELETE FROM courseandpro WHERE meid=#{meid} and identityType=#{identityType} and caid=#{caid}
+	</delete>
+	<resultMap type="entity.MemAndExp" id="courseandpro">
+			<id column="id" property="id"/>				
+			<result column="num" property="num"/>
+			<result column="name" property="name"/>
+			<result column="aid" property="aid"/>
+			<result column="identityType" property="identityType"/>
+		<collection property="admin" ofType="entity.Admin">
+			<result column="realname" property="realname"/>
+		</collection>
+	</resultMap>
+	<resultMap type="entity.CourseInfo" id="courseinfo">
+			<result column="uid" property="uid"/>
+			<result column="uname" property="uname"/>
+			<result column="finish" property="finish"/>
+			<result column="ctitle" property="ctitle"/>
+			<result column="chapter" property="chapter"/>
+			<result property="cid" column="cid"/>
+			<result column="realname" property="realname"/>			
+			<result column="sex" property="sex"/>
+			<result column="school" property="school"/>
+		<collection property="course" ofType="entity.Course">
+			<result property="id" column="cid"/>		
+			<result property="title" column="ctitle"/>
+			<result property="chapter" column="chapter"/>
+		</collection>
+		<collection property="user" ofType="entity.User">
+			<id column="id" property="id"/>
+			<result column="name" property="uname"/>
+			<result column="finish" property="finish"/>
+		</collection>
+		<collection property="courseandpro" ofType="entity.Courseandpro">
+			<result column="cid" property="cid"/>
+			<result column="uid" property="uid"/>
+		</collection>
+		<collection property="member" ofType="entity.Member">
+			<id column="mid" property="id"/>
+			<result column="realname" property="name"/>
+			<result column="sex" property="sex"/>
+			<result column="school" property="school"/>			
+		</collection>
+	</resultMap>
+	<resultMap type="entity.Courseandpro" id="categorycourseandpro">
+			<id column="id" property="id"/>				
+			<result column="meid" property="meid"/>
+			<result column="identityType" property="identityType"/>
+			<result column="proportion" property="proportion"/>
+			<result column="identityType" property="identityType"/>
+			<result column="caid" property="caid"/>
+		<collection property="memAndExp" ofType="entity.MemAndExp">
+			<result column="num" property="num"/>
+			<result column="name" property="name"/>
+		</collection>
+		<collection property="admin" ofType="entity.Admin">
+			<result column="realname" property="realname"/>
+		</collection>
+	</resultMap>
+	
+	
+</mapper>

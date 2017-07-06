@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="mapper.AdminMapper">
+	<select id="getValid" parameterType="entity.Admin" resultType="entity.Admin">
+		select * from admin where name=#{name} and pwd=#{pwd}
+	</select>
+	<insert id="add" parameterType="entity.Admin">
+		insert into admin(name,pwd,salt) values (#{name},#{pwd},#{salt})
+	</insert>
+	<select id="getSalt" parameterType="entity.Admin" resultType="String">
+		select salt from admin where name=#{name}
+	</select>
+	<select id="getAuthority" parameterType="entity.Admin" resultType="String">
+		select authority from admin where id=#{id}
+	</select>
+	<select id="getAmById" parameterType="int" resultType="entity.Admin">
+		select * from admin where id=#{id}
+	</select>
+	<select id="getAll" resultType="entity.Admin">
+		select * from admin
+	</select>
+	<update id="modifyPwd" parameterType="entity.Admin">
+		UPDATE admin SET pwd = #{pwd},salt = #{salt} WHERE	id = #{id}
+	</update>
+	<select id="getAllAdmin" parameterType="entity.Admin" resultType="entity.Admin">
+		SELECT * FROM admin WHERE authority != 1
+	</select>
+	<update id="modifyAuthority" parameterType="entity.Admin">
+		UPDATE admin SET authority = #{authority} WHERE id = #{id}
+	</update>
+	<select id="getLoginAuthority" parameterType="entity.Admin" resultType="String">
+		select authority from admin where name=#{name}
+	</select>
+	<select id="getWorkAdmin" resultType="entity.Admin">
+		select * from admin where authority != 2
+	</select>
+	
+</mapper>

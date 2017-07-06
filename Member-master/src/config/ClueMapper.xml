@@ -1,0 +1,369 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="mapper.ClueMapper">
+	<select id="getNum" resultType="String">
+		SELECT num from clue order by num desc limit 1
+	</select>
+	<delete id="delete" parameterType="int">
+	DELETE FROM clue WHERE id=#{id}
+	</delete>
+	
+	<select id="getCount" parameterType="int" resultType="int" >
+		SELECT
+			count(*)
+		FROM
+			communication
+		WHERE
+			cid = #{num};	
+	</select>
+	
+			<!--
+		type=0表示提取所有数据
+		type=1表示提取指定id为指定no的数据
+		type=2表示提取所有需要审核的数据
+		type=3表示提取所有需要缴费的数据
+		type=4表示提取所有已审核的用户  王冰冰20151203
+		-->
+	<!--
+	 * 修改：新增communication表中的沟通次数
+	 * 作者：陈家豪
+	 * 日期：2017-4-8
+	-->
+	<select id="getClue" resultMap="clue">
+		SELECT
+			COMMIT .COUNT AS counts,
+			c.id cid,
+			c.num cnum,
+			c.realName crealName,
+			c.sex csex,
+			c.qq cqq,
+			c.school cschool,
+			c.diploma cdiploma,
+			c.btime cbtime,
+			c.etime cetime,
+			c.type ctype,
+			c.phone cphone,
+			c.flag cflag,
+			c.graduateDate cgraduateDate,
+			ad.id adid,
+			ad.realname adrealname,
+			tableb.exnum expnum
+		FROM
+			clue c
+		LEFT JOIN (
+			SELECT
+				e.num exnum,
+				c.id cid
+			FROM
+				experience e,
+				clue c
+			WHERE
+				c.exnum = e.num
+		) tableb ON c.id = tableb.cid
+		LEFT JOIN admin ad ON c.aid = ad.id
+		LEFT JOIN (
+			SELECT
+				cid,
+				count(0) AS count
+			FROM
+				communication
+			GROUP BY
+				cid
+		) COMMIT ON COMMIT .cid = c.id
+		ORDER BY
+			cnum DESC
+	</select>
+	<!--
+	 * 修改：添加出生地seat_provid
+	 * 作者：王德斌
+	 * 日期：2016-10-13
+	 -->
+ 	<update id="update" parameterType="entity.Clue">
+  		update clue set
+  		realName = #{realName},
+  		sex = #{sex},
+  		qq = #{qq},
+  		school = #{school},
+  		diploma = #{diploma},
+  		btime = #{btime},
+  		etime = #{etime},
+  		type = #{type},
+  		aid = #{admin.id},
+  		phone = #{phone},
+  		flag = #{flag},
+  		graduateDate = #{graduateDate},
+  		exnum = #{exnum}
+  		where id = #{id}
+ 	</update>
+	<insert id="add" parameterType="entity.Clue" useGeneratedKeys="true" keyProperty="id">
+		insert into clue(num,qq,sex,btime,type,aid,flag) values (#{num},#{qq},#{sex},#{btime},#{type},#{admin.id},0)
+	</insert>
+	<select id="checkExists" parameterType="String" resultType="int">
+			SELECT COUNT(*) FROM clue WHERE num=#{num}
+	</select>
+	<select id="getSaltByNum" parameterType="String" resultType="String">
+		select salt from clue where num=#{num}
+	</select>
+	<select id="checkqq" parameterType="String" resultType="boolean">
+		<![CDATA[
+		SELECT
+			COUNT(*)
+		FROM
+			clue
+		WHERE
+			qq = #{qq}
+		]]>
+	</select>
+	<select id="getUidById" parameterType="int" resultType="int">
+		SELECT u.id from(
+					select m.uid muid
+					from clue e,member m 
+					where e.id=m.eid and e.id=#{id}) tablea,user u
+					WHERE tablea.muid=u.id
+	</select>
+	<select id="getMidById" parameterType="int" resultType="int">
+		select m.id from clue e,member m where e.id=m.eid and e.id=#{id}
+	</select>
+	<select id="getQqSearch" parameterType="String" resultMap="clue">
+		SELECT
+			COMMIT .COUNT AS counts,
+			c.id cid,
+			c.num cnum,
+			c.realName crealName,
+			c.sex csex,
+			c.qq cqq,
+			c.school cschool,
+			c.diploma cdiploma,
+			c.btime cbtime,
+			c.etime cetime,
+			c.type ctype,
+			c.phone cphone,
+			c.flag cflag,
+			c.graduateDate cgraduateDate,
+			ad.id adid,
+			ad.realname adrealname,
+			tableb.exnum expnum
+		FROM
+			clue c
+		LEFT JOIN (
+			SELECT
+				e.num exnum,
+				c.id cid
+			FROM
+				experience e,
+				clue c
+			WHERE
+				c.exnum = e.num
+		) tableb ON c.id = tableb.cid
+		LEFT JOIN admin ad ON c.aid = ad.id
+		LEFT JOIN (
+			SELECT
+				cid,
+				count(0) AS count
+			FROM
+				communication
+			GROUP BY
+				cid
+		) COMMIT ON COMMIT .cid = c.id
+		WHERE
+			c.qq LIKE #{qq}
+		ORDER BY
+			cnum DESC
+	</select>
+	<select id="isValid" resultType="entity.Clue" parameterType="entity.Clue">
+		select * from clue where num=#{num} and `password`=#{password}
+	</select>
+	
+	<!--
+	 * 修改：添加出生地seat_provid
+	 * 作者：王德斌
+	 * 日期：2016-10-13
+	 -->
+	<select id="getClueById" resultMap="clue" parameterType="int">
+		SELECT
+			COMMIT .COUNT AS counts,
+			c.id cid,
+			c.num cnum,
+			c.realName crealName,
+			c.sex csex,
+			c.qq cqq,
+			c.school cschool,
+			c.diploma cdiploma,
+			c.btime cbtime,
+			c.etime cetime,
+			c.type ctype,
+			c.phone cphone,
+			c.flag cflag,
+			c.graduateDate cgraduateDate,
+			ad.id adid,
+			ad.realname adrealname,
+			tableb.exnum expnum
+		FROM
+			clue c
+		LEFT JOIN (
+			SELECT
+				e.num exnum,
+				c.id cid
+			FROM
+				experience e,
+				clue c
+			WHERE
+				c.exnum = e.num
+		) tableb ON c.id = tableb.cid
+		LEFT JOIN admin ad ON c.aid = ad.id
+		LEFT JOIN (
+			SELECT
+				cid,
+				count(0) AS count
+			FROM
+				communication
+			GROUP BY
+				cid
+		) COMMIT ON COMMIT .cid = c.id
+		WHERE
+			c.id = #{id}
+	</select>
+	<!--
+	 * 修改：新增communication表中的沟通次数
+	 * 作者：陈家豪
+	 * 日期：2017-4-8
+	-->	
+	<select id="getClues" resultMap="clue">
+		SELECT
+			COMMIT .COUNT AS counts,
+			c.id cid,
+			c.num cnum,
+			c.realName crealName,
+			c.sex csex,
+			c.qq cqq,
+			c.school cschool,
+			c.diploma cdiploma,
+			c.btime cbtime,
+			c.etime cetime,
+			c.type ctype,
+			c.phone cphone,
+			c.flag cflag,
+			c.graduateDate cgraduateDate,
+			ad.id adid,
+			ad.realname adrealname,
+			tableb.exnum expnum
+		FROM
+			clue c
+		LEFT JOIN (
+			SELECT
+				e.num exnum,
+				c.id cid
+			FROM
+				experience e,
+				clue c
+			WHERE
+				c.exnum = e.num
+		) tableb ON c.id = tableb.cid
+		LEFT JOIN admin ad ON c.aid = ad.id
+		LEFT JOIN (
+			SELECT
+				cid,
+				count(0) AS count
+			FROM
+				communication
+			GROUP BY
+				cid
+		) COMMIT ON COMMIT .cid = c.id
+		<if test="qq != null">
+			WHERE
+				c.qq LIKE #{qq}
+		</if>
+		<if test="qq == null">
+			<if test="type != -1">
+				WHERE
+					c.flag = #{type}
+				<if test="aid != 0">
+					AND
+						c.aid = #{aid}
+				</if>
+			</if>
+			<if test="type == -1">
+				<if test="aid != 0">
+					WHERE
+						c.aid = #{aid}
+				</if>
+			</if>
+		</if>
+		ORDER BY
+			cnum DESC
+	</select>
+	<!--
+	 * 修改：添加出生地seat_provid
+	 * 作者：王德斌
+	 * 日期：2016-10-13
+	 -->
+	<select id="getClueByPage" resultMap="clue" parameterType="dto.ClueDTO">
+			SELECT
+		    c.id   cid,
+				c.num cnum,
+				c.realName crealName,
+				c.sex csex,
+				c.qq cqq,
+				c.school cschool,
+				c.diploma cdiploma,
+				c.btime cbtime,
+				c.etime cetime,
+				c.type ctype,
+				c.phone cphone,
+				c.flag  cflag,
+				c.graduateDate cgraduateDate,
+				ad.id adid,
+				ad.realname adrealname,
+				tableb.exnum expnum
+				
+			FROM
+				clue c
+			left join 
+			(
+					select e.num exnum ,c.id cid
+					from  experience e ,clue c 
+					where c.exnum = e.num
+					 
+				) tableb
+			on c.id=tableb.cid
+			LEFT JOIN admin ad ON c.aid = ad.id
+			ORDER BY cid  
+
+	</select>
+	
+	<!--
+	 * 修改：添加出生地seat_provid
+	 * 作者：王德斌
+	 * 日期：2016-10-13
+	 -->
+	<!--
+	 * 修改：新增communication表中的沟通次数
+	 * 作者：陈家豪
+	 * 日期：2017-4-8
+	-->	 
+	<resultMap type="entity.Clue" id="clue">
+		<id column="cid" property="id"/>
+		<result column="cnum" property="num"/>
+		<result column="crealName" property="realName"/>
+		<result column="csex" property="sex"/>	
+		<result column="cqq" property="qq"/>
+		<result column="cflag" property="flag"/>
+		<result column="cphone" property="phone"/>
+		<result column="cschool" property="school"/>
+		<result column="cgraduateDate" property="graduateDate"/>
+		<result column="cbtime" property="btime"/>
+		<result column="cetime" property="etime"/>
+		<result column="ctype" property="type"/>
+		<result column="cdiploma" property="diploma"/>
+		<result column="expnum" property="exnum"/>
+		<result column="cai" property="aid"/>
+		<result column="counts" property="counts" />
+		<association property="admin" javaType="entity.Admin">
+			<id column="adid" property="id"/>
+			<result column="adrealname" property="realname"/>
+		</association>	
+	</resultMap>
+	
+</mapper>

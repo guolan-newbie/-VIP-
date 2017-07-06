@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:tx="http://www.springframework.org/schema/tx"
+    xmlns:aop="http://www.springframework.org/schema/aop"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+        http://www.springframework.org/schema/context
+		http://www.springframework.org/schema/context/spring-context-4.1.xsd
+  		http://www.springframework.org/schema/tx
+  		http://www.springframework.org/schema/tx/spring-tx-4.1.xsd		
+		http://www.springframework.org/schema/aop
+		http://www.springframework.org/schema/aop/spring-aop-4.1.xsd">
+
+		<context:component-scan base-package="dao,tools" />
+		<context:property-placeholder location="classpath:db.properties" />
+		<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource"  destroy-method="close">
+		    <!-- 数据源连接参数配置； -->
+		    <property name="username" value="${db.username}"/>
+		    <property name="url" value="${db.url}"/>
+		    <property name="password" value="${db.password}"/>
+		    <property name="driverClassName" value="${db.driver}"/>
+	        <!-- 连接池启动时的初始值 -->
+			<property name="maxWait" value="20000"></property>
+			<property name="validationQuery" value="SELECT 1"></property>
+			<property name="testWhileIdle" value="true"></property>
+			<property name="testOnBorrow" value="true"></property>
+			<property name="timeBetweenEvictionRunsMillis" value="3600000"></property>
+			<property name="numTestsPerEvictionRun" value="50"></property>
+			<property name="minEvictableIdleTimeMillis" value="120000"></property>
+			<property name="removeAbandoned" value="true"/>
+			<property name="removeAbandonedTimeout" value="6000000"/>	        	    
+		</bean> 	
+
+	   	 <!-- 配置SessionFactory -->
+	     <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+	      <property name="dataSource" ref="dataSource"/>    
+			<!-- <property name="mapperLocations" value="classpath:mapper/*.xml" /> -->
+			<!-- 加载mybatis的全局配置文件 -->
+			<property name="configLocation" value="classpath:sqlMapConfig.xml" />
+			<property name="mapperLocations">
+			<list>			
+				<value>classpath:config/**/*.xml</value>
+			</list>
+			</property>
+			<!-- 配置Mybatis的插件plugin-->
+		    <property name="plugins">
+		        <array>
+		            <bean class="pageinterceptor.PageInterceptor">
+						
+		            </bean>
+		        </array>
+		    </property>
+		    
+		</bean>	   
+		<!-- 自动扫描mapper接口,注入sqlSessionFactory -->
+		<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+			<property name="basePackage" value="mapper"/>
+		</bean>
+	 <!-- 配置事务管理器 -->
+	  <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+	      <property name="dataSource" ref="dataSource"/>
+	  </bean> 
+	
+	<!-- <tx:annotation-driven transaction-manager="transactionManager"  proxy-target-class="true"/> -->
+	  <!-- 定义切面 -->
+	<aop:config>
+	    <aop:pointcut expression="execution(* dao.*.* (..))" id="txPointCut"/>
+	    <aop:advisor advice-ref="txAdvice" pointcut-ref="txPointCut"/>
+	</aop:config>
+	  
+	<!-- 声明式事务 -->
+	<tx:advice id="txAdvice" transaction-manager="transactionManager">            
+	    <tx:attributes>
+	         <!-- 传播行为 -->
+			<tx:method name="save*" propagation="REQUIRED" />
+			<tx:method name="insert*" propagation="REQUIRED" />
+			<tx:method name="add*" propagation="REQUIRED" />
+			<tx:method name="create*" propagation="REQUIRED" />
+			<tx:method name="delete*" propagation="REQUIRED" />
+			<tx:method name="update*" propagation="REQUIRED" />
+			<tx:method name="find*" propagation="SUPPORTS" read-only="true" />
+			<tx:method name="select*" propagation="SUPPORTS" read-only="true" />
+			<tx:method name="get*" propagation="SUPPORTS" read-only="true" />
+	    </tx:attributes>        
+	</tx:advice>	   	
+</beans>

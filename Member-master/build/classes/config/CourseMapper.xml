@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="mapper.CourseMapper">
+	<update id="update" parameterType="entity.Course">
+		update course set title=#{title},chid=#{chid},optional_flag=#{optional_flag},`order`=#{order} where id=#{id}
+	</update>		
+	<insert id="add"  parameterType="entity.Course"  useGeneratedKeys="true" keyProperty="id">
+		insert into course(title,chid,optional_flag,`order`) values (#{title},#{chid},#{optional_flag},#{order})
+	</insert>
+	<delete id="delete" parameterType="int">
+		delete from course where id=#{id};
+	</delete>
+	<select id="getCourseById" parameterType="int" resultType="entity.Course">
+		select * from course where id=#{id};
+	</select>
+	<select id="getCourseByPage" parameterType="dto.CourseDTO" resultType="entity.Course">
+	select 
+	c1.id id,
+	c1.title title,
+	c1.chid chid,
+	c1.optional_flag optional_flag,
+	c1.`order` `order`,
+	c2.title chtitle
+	from course c1
+	LEFT JOIN course c2
+	ON c1.chid=c2.id
+	ORDER BY chid,`order`
+	</select>
+	<select id="getallCid" resultType="double">
+		select count(*) from course
+	</select>
+	<select id="getchapter" parameterType="int" resultType="String">
+		select chapter from course where id=#{id}
+	</select>
+	<select id="getChapters"  resultType="entity.Course">
+		select * from course where chid=0 
+	</select>
+	<select id="getLessons"  parameterType="int" resultType="entity.Course">
+		select * from course where chid=#{chid} ORDER BY course.order ASC
+	</select>
+	<select id="getcpid" parameterType="int" resultType="int">
+		select pid from course where id=#{cid}
+	</select>
+	<select id="finishcourse" parameterType="int" resultMap="courseinfo">
+		SELECT 
+			c.title ctitle,
+			c.chapter   chapter,
+			c.id    id,
+			cp.cid  cid,
+			cp.uid  uid,	
+			m.id	mid,	
+			m.name 	realname,
+			m.sex  	sex,
+			m.school school
+		FROM 
+			courseandpro cp,	
+			course c,
+			member m
+		where
+			cp.cid=c.id
+		and 
+			cp.uid=m.uid
+		AND
+			cp.uid=#{uid}	
+	</select>
+	<select id="getcategory"  resultType="entity.Category">
+		select * from category
+	</select>
+	<select id="getcachapter"  parameterType="int" resultMap="chapter">		
+		select 
+			c.id id,
+			c.title title,
+			c.chid chid,
+			c.optional_flag optional_flag,
+			c.`order` `order`,
+			cc.`order` ccorder
+		from 
+			course c,
+			course_and_category cc
+		WHERE
+			c.id=cc.cid
+		AND
+			cc.caid=#{caid}	
+		ORDER BY ccorder ASC
+	</select>
+		<select id="getChaptersNotInThisCategory"  parameterType="int" resultType="entity.Course">		
+		SELECT 
+			c.id id,
+			c.title title,
+			c.chid chid,
+			c.optional_flag optional_flag,
+			c.`order` `order`
+from course c 
+WHERE c.id not in(
+			select 
+			c.id
+		from 
+			course c,
+			course_and_category cc
+		WHERE
+			c.id=cc.cid
+		AND
+			cc.caid=#{caid}	)
+AND c.chid=0
+	</select>
+	<update id="setOrder" parameterType="entity.Course">
+		update course set `order`=#{order} where id=#{id}
+	</update>
+	<insert id="addCategory" parameterType="entity.Category"  useGeneratedKeys="true" keyProperty="id">
+		insert into category(title) values (#{title})
+	</insert>
+	<select id="getLastCategoryId" resultType="int">
+		select id from category ORDER BY id DESC LIMIT 1
+	</select>
+	<insert id="addCourseAndCategory" parameterType="entity.CourseAndCategory">
+		insert into course_and_category(caid,cid,`order`) values (#{caid},#{cid},#{order})
+	</insert>
+	<select id="getCategoryByMeid" parameterType="entity.MemAndExp" resultType="entity.Category">
+		select ca.id id,ca.title title from courseandpro cap,`v_mem&amp;exp` v,category ca WHERE cap.meid=v.id and cap.identityType=v.identityType and ca.id=cap.caid and v.id=#{id} and v.identityType=#{identityType}
+	</select>
+	<update id="updateCategory" parameterType="entity.Category">
+		update category set `title`=#{title} where id=#{id}
+	</update>
+	<delete id="deleteCCByCaid" parameterType="int">
+		DELETE from course_and_category WHERE caid=#{caid}
+	</delete>
+	<select id="getCourseGross" parameterType="entity.Courseandpro" resultType = "int">
+		select count(*) from course where chid in (select cid from course_and_category where caid = #{caid})
+	</select>
+	<select id="getCourseAmountBeforeThisChapter" parameterType="entity.Courseandpro" resultType = "int">
+		SELECT max(c.`order`) from course c WHERE c.chid in (SELECT cid from course_and_category cc WHERE cc.caid=#{caid} and cc.`order`&lt;#{chorder}) GROUP BY c.chid
+	</select>
+	<select id="getCategoryTitleByCid" parameterType="int" resultType = "String">
+		SELECT title from course_and_category cc,category ca WHERE cc.caid=ca.id  and cc.cid=#{cid}
+	</select>
+	<delete id="deleteCCByCid" parameterType="int">
+		delete from course_and_category where cid=#{cid};
+	</delete>
+	<delete id="deleteByChid" parameterType="int">
+		delete from course where chid=#{chid};
+	</delete>
+	<select id="getTheSamePeriodMember" parameterType="dto.CourseDTO" resultType = "entity.Member">
+		SELECT m.id id,m.`name` name from member m,user u WHERE u.`name` BETWEEN #{num}-#{range} and #{num}+#{range} and u.`name` &lt;&gt; #{num} and m.uid=u.id ORDER BY u.`name`
+	</select>
+	<select id="getTheSameProgressStudent" parameterType="dto.CourseandproDTO" resultType = "entity.MemAndExp">
+		SELECT v.id id,v.identityType identityType,v.`name` `name` from courseandpro cap,`v_mem&amp;exp` v WHERE cap.caid=#{caid} and cap.proportion BETWEEN  #{proportion}-#{range} and #{proportion}+#{range} and cap.meid&lt;&gt;#{meid}
+		<if test="identityType==1"> and cap.identityType=1</if>
+		<if test="identityType==0"> and cap.identityType=0</if>
+		and cap.meid=v.id and cap.identityType=v.identityType
+	</select>
+	<resultMap type="entity.CourseInfo" id="courseinfo">
+			<result column="uid" property="uid"/>
+			<result column="ctitle" property="ctitle"/>
+			<result column="chapter" property="chapter"/>
+			<result column="cid" property="cid"/>
+			<result column="realname" property="realname"/>			
+			<result column="sex" property="sex"/>
+			<result column="school" property="school"/>
+		<collection property="course" ofType="entity.Course">
+			<id column="id" property="id"/>
+			<result property="title" column="ctitle"/>
+			<result property="chapter" column="chapter"/>
+		</collection>
+		<collection property="courseandpro" ofType="entity.Courseandpro">
+			<result column="cid" property="cid"/>
+			<result column="uid" property="uid"/>
+		</collection>
+		<collection property="member" ofType="entity.Member">
+			<id column="mid" property="id"/>
+			<result column="realname" property="name"/>
+			<result column="sex" property="sex"/>
+			<result column="school" property="school"/>			
+		</collection>
+	</resultMap>
+	<resultMap type="entity.Course" id="course">
+			<result column="id" property="id"/>
+			<result column="title" property="title"/>
+			<result column="chid" property="chid"/>
+			<result column="optional_flag" property="optional_flag"/>
+			<result column="order" property="order"/>
+			<result column="chtitle" property="chtitle" />
+
+
+
+	</resultMap>
+	<resultMap type="entity.Course" id="chapter">
+			<result column="id" property="id"/>
+			<result column="title" property="title"/>
+			<result column="chid" property="chid"/>
+			<result column="optional_flag" property="optional_flag"/>
+			<result column="order" property="order"/>
+			<collection property="courseAndCategory" ofType="entity.CourseAndCategory">
+				<result property="order" column="ccorder"/>
+			</collection>
+	</resultMap>
+
+</mapper>

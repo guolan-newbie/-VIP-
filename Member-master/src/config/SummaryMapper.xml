@@ -1,0 +1,1416 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="mapper.SummaryMapper">
+	<insert id="add" parameterType="entity.Summary">
+		insert into summary(eid,mid,title,content,time,ischeck) values(#{eid},#{mid},#{title},#{content},#{time},#{ischeck})
+	</insert>
+	<update id="approveSumarry" parameterType="entity.Summary">
+		update summary set ischeck=#{ischeck} where id=#{id}
+	</update>
+	<update id="deleteRemind" parameterType="int">
+		update summary set remind=0 where id=#{id}
+	</update>
+	<delete id="delSum" parameterType="int">
+		delete from summary where id=#{id}
+	</delete>
+	<delete id="delCom" parameterType="int">
+		delete from summary where pid=#{pid}
+	</delete>
+	<select id="getNewestComment" parameterType="int" resultType="entity.Summary">
+		select * from summary where time in (select MAX(time) from summary where pid=#{pid})
+	</select>
+	<select id="checkIsRepeatByTit" parameterType="entity.Summary" resultType="String" >
+		select count(*) from summary
+		<where>  
+			 	title=#{title}
+        		 <if test="eid!=null and eid!=''">  
+            		AND eid=#{eid}  
+        		</if> 
+        		 <if test="mid!=null and mid!=''">  
+            		AND mid=#{mid}  
+        		</if> 
+    		</where>  
+	</select>
+	<select id="getAid" parameterType="entity.Summary" resultType="int">
+		select aid from summary where id=#{id}
+	</select>
+	<select id="getExpId" parameterType="Integer" resultType="Integer">
+		select IFNULL(MAX(id),0) from summary where eid=#{id} and pid=0 ORDER BY time desc limit 1
+	</select>
+	<select id="getMId" parameterType="Integer" resultType="Integer">
+		select IFNULL(MAX(id),0) from summary where mid=#{id} and pid=0 ORDER BY time desc limit 1
+	</select>
+	<select id="getRemind" parameterType="Integer" resultType="Integer">
+		select IFNULL(MAX(remind),0) from summary where id=#{id}
+	</select>
+	<select id="getEid" parameterType="entity.Summary" resultType="int">
+		select eid from summary where id=#{id}
+	</select>
+	<insert id="addTitle">
+		insert into summary(mid,title) values(#{member.id},#{title})
+	</insert>
+	<update id="updateSummary" parameterType="entity.Summary">
+		update summary set content=#{content} where id=#{id}
+	</update>
+	<update id="updateRemind" parameterType="int">
+		update summary set remind=1 where id=#{id}
+	</update>
+	<update id="update1Summary" parameterType="entity.Summary">
+		update summary set title=#{title} where id=#{id}
+	</update>
+	<select id="getSumById" parameterType="entity.Summary"  resultType="entity.Summary">
+		select * from summary where id=#{id}
+	</select>
+	<select id="getSummaryAll" resultMap="allSum" parameterType="String">
+		select
+			s.id id,
+			s.title title,
+			s.content content,
+			s.ischeck ischeckval,
+			DATE_FORMAT(s.time,'%Y/%c/%d %H:%i:%S') time,
+			m.id mid,
+			m.name name
+		from
+			summary s,
+			member m
+		where 
+			m.id=s.mid and pid=0 and title=#{title} ORDER BY id DESC;
+	</select>
+	<resultMap type="entity.Summary" id="allSum">
+		<id property="id" column="id"/>
+		<result property="title" column="title"/>
+		<result property="content" column="content"/>
+		<result property="time" column="time"/>
+		<result property="ischeck" column="ischeckval"/>
+		<collection property="member" ofType="entity.Member">
+			<id property="id" column="mid" />
+			<result property="name" column="name" />
+		</collection>		
+	</resultMap>
+	<select id="getMemId" parameterType="int" resultType="int">
+		select mid from summary where id=#{id}
+	</select>
+	<select id="getComment" parameterType="int" resultMap="comment">
+		select 
+			a.id aid,
+			a.pid apid,
+			b.id bid,
+			b.pid bpid,
+			DATE_FORMAT(b.time,'%Y/%c/%d %H:%i:%S') btime,
+			b.content bcontent
+		from 
+			summary a
+		left join
+			summary b
+		on 
+			a.id=b.pid
+		where 
+			b.pid=#{id} ORDER BY btime 
+	</select>
+	<resultMap type="entity.Summary" id="comment">
+		<id property="id" column="aid"/>
+		<result property="pid" column="apid"/>
+		<collection property="summaries" ofType="entity.Summary">
+			<id property="id" column="bid"/>
+			<result property="time" column="btime"/>
+			<result property="pid" column="bpid"/>
+			<result property="content" column="bcontent"/>
+		</collection>
+	</resultMap>
+	<insert id="addComment" parameterType="entity.Summary">
+		insert into summary
+			(
+			
+			pid,
+			time,
+			<if test="admin!=null">
+				aid,
+			</if>
+			<if test="member!=null">
+				mid,
+			</if>
+			<if test="experience!=null">
+				eid,
+			</if>
+			content
+			) 
+		values
+			(		
+			#{pid},
+			#{time},
+			<if test="admin!=null">
+				#{admin.id},
+			</if>
+			<if test="member!=null">
+				#{member.id},
+			</if>
+			<if test="experience!=null">
+				#{experience.id},
+			</if>
+			#{content}
+			)
+	</insert>
+	<select id="getContent" parameterType="entity.Summary" resultType="entity.Summary">
+		select id,content from summary 
+		where 
+		<if test="admin!=null">
+			aid=#{admin.id} and ischeck=0
+		</if>
+		<if test="admin==null">
+			mid=#{member.id} and ischeck=0 
+		</if>
+	</select>
+	<select id="JudgeMemIsModify" parameterType="entity.Summary" resultType="int">
+		select count(*) from summary 
+		where 
+		<if test="admin!=null">
+			aid=#{admin.id} and ischeck=0
+		</if>
+		<if test="admin==null">
+			mid=#{member.id} and ischeck=0 
+		</if>
+	</select>
+	<select id="isChePid" parameterType="int" resultType="int">
+		select count(*) from summary where pid=#{id}
+	</select>
+	<select id="isApprove" parameterType="int" resultType="int">
+		select COALESCE(ischeck,0) from summary where id=#{id}
+	</select>
+	<select id="checkUserIsWrite" parameterType="int" resultType="int">
+		select count(*) from summary where mid=#{mid} AND title!=null
+	</select>
+	<select id="getContent2" parameterType="entity.Summary" resultType="entity.Summary">
+		select id,content from summary 
+		where 
+		<if test="admin!=null">
+			aid=#{admin.id} and ischeck=0 and pid=0
+		</if>
+		<if test="admin==null">
+			mid=#{member.id} and ischeck=0 and pid=0
+		</if>
+	</select>
+	<select id="getSummaryByWeek" resultMap="allSumByweek" parameterType="String">
+		select
+			s.id id,
+			s.title title,
+			s.content content,
+			s.ischeck ischeckval,
+			DATE_FORMAT(s.time,'%Y/%c/%d %H:%i:%S') time,
+			m.id mid,
+			m.name name
+		from
+			summary s,
+			member m
+		where 
+			m.id=s.mid and pid=0 and title=#{title} ORDER BY id DESC;
+	</select>
+		<select id="getSummarysByPage" parameterType="dto.SummaryDTO" resultType="entity.LookSummary">
+		<choose>
+		<when test="assistant!=0">
+		<choose>  
+            <when test="weekType!=null and weekType!='' and weekType!='all' and checkType=='all' and ownerType!='my' and ownerType!='others'">  
+	           SELECT 
+				tableb.sid sid,
+				tableb.title title,
+				tableb.content content,
+				tableb.ischeckval ischeckval,
+				tableb.time time,
+				tableb.id id,
+				tableb.num num,
+				tableb.name name,
+				tableb.aid aid,
+				tableb.summaryflag summaryflag,
+				tableb.identityType identityType,
+				tableb.beginTime beginTime,
+				a.realname arealname 
+				FROM  admin a LEFT JOIN(
+				SELECT 
+				vls.sid sid,
+				vls.title title,
+				vls.content content,
+				vls.ischeckval ischeckval,
+				vls.time time,
+				tablea.id id,
+				tablea.num num,
+				tablea.name name,
+				tablea.aid aid,
+				tablea.summaryflag summaryflag,
+				tablea.identityType identityType,
+				tablea.beginTime beginTime
+				FROM(
+							SELECT 
+										vme.id id,
+										vme.num num,
+										vme.name name,
+										vme.aid aid,
+										vme.summaryflag summaryflag,
+										vme.identityType identityType,
+										vme.beginTime beginTime										
+							FROM `v_mem&amp;exp` vme 
+							WHERE vme.summaryflag=1)tablea 
+				LEFT JOIN v_looksummary vls
+				ON tablea.id=vls.id 
+				AND tablea.identityType=vls.identityType
+				AND title=#{title} 	AND pid=0 
+				UNION
+				SELECT 
+							vls.sid sid,
+							vls.title title,
+							vls.content content,
+							vls.ischeckval ischeckval,
+							vls.time time,
+							vme.id id,
+							vme.num num,
+							vme.name name,
+							vme.aid aid,
+							vme.summaryflag summaryflag,
+							vme.identityType identityType,
+							vme.beginTime beginTime
+							FROM `v_mem&amp;exp` vme,v_looksummary vls 
+							WHERE vme.id=vls.id 
+							AND vme.identityType=vls.identityType
+							AND pid=0
+							AND title=#{title})tableb			
+				ON tableb.aid=a.id
+				and aid=#{assistant}
+				WHERE str_to_date(substring_index(#{title}, '-', -1),'%Y/%m/%d')>beginTime
+				ORDER BY num		
+            </when>
+
+	        <otherwise> 
+	        SELECT 
+			tablea.sid sid,
+			tablea.title title,
+			tablea.content content,
+			tablea.ischeckval ischeckval,
+			tablea.time time,
+			tablea.id id,
+			tablea.num num,
+			tablea.name name,
+			tablea.aid aid,
+			tablea.summaryflag summaryflag,
+			tablea.identityType identityType,
+			a.realname arealname 
+			from  admin a LEFT JOIN(			 
+	            select 
+					v.sid sid,
+					v.title title,
+					v.content content,
+					v.ischeckval ischeckval,
+					v.time time,
+					v.id id,
+					v.num num,
+					v.name name,
+					v.aid aid,
+					v.summaryflag summaryflag,
+					v.identityType identityType
+				from v_looksummary v
+				 <where>  
+				 	pid=0
+	        		<if test="checkType=='checked'">  
+	        			AND v.ischeckval=1  
+	        		</if>  
+	        		<if test="checkType=='nonchecked'">  
+	        			AND v.ischeckval=0  
+	        		</if>    
+	    		</where> )tablea     		
+				ON tablea.aid=a.id 
+				where aid=#{assistant}
+				ORDER BY num   
+	         </otherwise>  
+         </choose>
+		</when>
+		<otherwise>
+			<choose>  
+            <when test="weekType!=null and weekType!='' and weekType!='all' and checkType=='all' and ownerType!='my' and ownerType!='others'">  
+	           SELECT 
+				tableb.sid sid,
+				tableb.title title,
+				tableb.content content,
+				tableb.ischeckval ischeckval,
+				tableb.time time,
+				tableb.id id,
+				tableb.num num,
+				tableb.name name,
+				tableb.aid aid,
+				tableb.summaryflag summaryflag,
+				tableb.identityType identityType,
+				tableb.beginTime beginTime,
+				a.realname arealname 
+				FROM(
+				SELECT 
+				vls.sid sid,
+				vls.title title,
+				vls.content content,
+				vls.ischeckval ischeckval,
+				vls.time time,
+				tablea.id id,
+				tablea.num num,
+				tablea.name name,
+				tablea.aid aid,
+				tablea.summaryflag summaryflag,
+				tablea.identityType identityType,
+				tablea.beginTime beginTime
+				FROM(
+							SELECT 
+										vme.id id,
+										vme.num num,
+										vme.name name,
+										vme.aid aid,
+										vme.summaryflag summaryflag,
+										vme.identityType identityType,
+										vme.beginTime beginTime										
+							FROM `v_mem&amp;exp` vme 
+							WHERE vme.summaryflag=1)tablea 
+				LEFT JOIN v_looksummary vls
+				ON tablea.id=vls.id 
+				AND tablea.identityType=vls.identityType
+				AND title=#{title} 	AND pid=0 
+				UNION
+				SELECT 
+							vls.sid sid,
+							vls.title title,
+							vls.content content,
+							vls.ischeckval ischeckval,
+							vls.time time,
+							vme.id id,
+							vme.num num,
+							vme.name name,
+							vme.aid aid,
+							vme.summaryflag summaryflag,
+							vme.identityType identityType,
+							vme.beginTime beginTime
+							FROM `v_mem&amp;exp` vme,v_looksummary vls 
+							WHERE vme.id=vls.id 
+							AND vme.identityType=vls.identityType
+							AND pid=0
+							AND title=#{title})tableb
+				LEFT JOIN admin a
+				ON tableb.aid=a.id
+				WHERE str_to_date(substring_index(#{title}, '-', -1),'%Y/%m/%d')>beginTime
+				ORDER BY num		
+            </when>
+            <when test="weekType!=null and weekType!='' and weekType!='all' and checkType=='nonsubmit' and ownerType!='my' and ownerType!='others'">  
+	           SELECT 
+				tableb.sid sid,
+				tableb.title title,
+				tableb.content content,
+				tableb.ischeckval ischeckval,
+				tableb.time time,
+				tableb.id id,
+				tableb.num num,
+				tableb.name name,
+				tableb.aid aid,
+				tableb.summaryflag summaryflag,
+				tableb.identityType identityType,
+				tableb.beginTime beginTime,
+				a.realname arealname 
+				FROM(
+				SELECT 
+				vls.sid sid,
+				vls.title title,
+				vls.content content,
+				vls.ischeckval ischeckval,
+				vls.time time,
+				tablea.id id,
+				tablea.num num,
+				tablea.name name,
+				tablea.aid aid,
+				tablea.summaryflag summaryflag,
+				tablea.identityType identityType,
+				tablea.beginTime beginTime
+				FROM(
+							SELECT 
+										vme.id id,
+										vme.num num,
+										vme.name name,
+										vme.aid aid,
+										vme.summaryflag summaryflag,
+										vme.identityType identityType,
+										vme.beginTime beginTime										
+							FROM `v_mem&amp;exp` vme 
+							WHERE vme.summaryflag=1)tablea 
+				LEFT JOIN v_looksummary vls
+				ON tablea.id=vls.id 
+				AND tablea.identityType=vls.identityType
+				AND title=#{title} 	AND pid=0 
+				UNION
+				SELECT 
+							vls.sid sid,
+							vls.title title,
+							vls.content content,
+							vls.ischeckval ischeckval,
+							vls.time time,
+							vme.id id,
+							vme.num num,
+							vme.name name,
+							vme.aid aid,
+							vme.summaryflag summaryflag,
+							vme.identityType identityType,
+							vme.beginTime beginTime
+							FROM `v_mem&amp;exp` vme,v_looksummary vls 
+							WHERE vme.id=vls.id 
+							AND vme.identityType=vls.identityType
+							AND pid=0
+							AND title=#{title})tableb
+				LEFT JOIN admin a
+				ON tableb.aid=a.id
+				WHERE str_to_date(substring_index(#{title}, '-', -1),'%Y/%m/%d')>beginTime and sid is null
+				ORDER BY num		
+            </when>
+
+	        <otherwise> 
+	        SELECT 
+			tablea.sid sid,
+			tablea.title title,
+			tablea.content content,
+			tablea.ischeckval ischeckval,
+			tablea.time time,
+			tablea.id id,
+			tablea.num num,
+			tablea.name name,
+			tablea.aid aid,
+			tablea.summaryflag summaryflag,
+			tablea.identityType identityType,
+			a.realname arealname 
+			from(			 
+	            select 
+					v.sid sid,
+					v.title title,
+					v.content content,
+					v.ischeckval ischeckval,
+					v.time time,
+					v.id id,
+					v.num num,
+					v.name name,
+					v.aid aid,
+					v.summaryflag summaryflag,
+					v.identityType identityType
+				from v_looksummary v
+				 <where>  
+				 	pid=0
+	        		<if test="checkType=='checked'">  
+	        			AND v.ischeckval=1  
+	        		</if>  
+	        		<if test="checkType=='nonchecked'">  
+	        			AND v.ischeckval=0  
+	        		</if>    
+	     		    <if test="ownerType=='my'">  
+	        			AND v.id=#{id}      			
+							<if test="identityType=='member'">  
+	        					AND v.identityType=1  
+	        				</if>
+	        				<if test="identityType=='experience'">  
+			        			AND v.identityType=0  
+			        		</if>
+	        		</if>
+	        		<if test="ownerType=='others'">  
+	        			AND v.id!=#{id}  
+	        		</if>
+					<if test="identityType=='member'">  
+	        			AND v.identityType=1  
+	        		</if>
+					<if test="identityType=='experience'">  
+	        			AND v.identityType=0  
+	        		</if>
+	        		 <if test="weekType!=null and weekType!='' and weekType!='all'">  
+	            		AND v.title=#{title}  
+	        		</if> 
+	    		</where> )tablea 
+	    		LEFT JOIN admin a
+				ON tablea.aid=a.id 
+				ORDER BY num,time desc   
+	         </otherwise>  
+         </choose>
+		</otherwise>
+		</choose>
+		
+			
+	</select>
+	<!-- 通过姓名查找周报 -->
+		<select id="getSummarysByNameWithPage" parameterType="dto.SummaryDTO" resultType="entity.LookSummary">
+		<choose>
+		<when test="assistant!=0">
+		<choose>  
+            <when test="weekType!=null and weekType!='' and weekType!='all' and checkType=='all' and ownerType=='所有人'">  
+	           SELECT 
+				tableb.sid sid,
+				tableb.title title,
+				tableb.content content,
+				tableb.ischeckval ischeckval,
+				tableb.time time,
+				tableb.id id,
+				tableb.num num,
+				tableb.name name,
+				tableb.aid aid,
+				tableb.summaryflag summaryflag,
+				tableb.identityType identityType,
+				tableb.beginTime beginTime,
+				a.realname arealname 
+				FROM  admin a LEFT JOIN(
+				SELECT 
+				vls.sid sid,
+				vls.title title,
+				vls.content content,
+				vls.ischeckval ischeckval,
+				vls.time time,
+				tablea.id id,
+				tablea.num num,
+				tablea.name name,
+				tablea.aid aid,
+				tablea.summaryflag summaryflag,
+				tablea.identityType identityType,
+				tablea.beginTime beginTime
+				FROM(
+							SELECT 
+										vme.id id,
+										vme.num num,
+										vme.name name,
+										vme.aid aid,
+										vme.summaryflag summaryflag,
+										vme.identityType identityType,
+										vme.beginTime beginTime										
+							FROM `v_mem&amp;exp` vme 
+							WHERE vme.summaryflag=1)tablea 
+				LEFT JOIN v_looksummary vls
+				ON tablea.id=vls.id 
+				AND tablea.identityType=vls.identityType
+				AND title=#{title} 	AND pid=0 
+				UNION
+				SELECT 
+							vls.sid sid,
+							vls.title title,
+							vls.content content,
+							vls.ischeckval ischeckval,
+							vls.time time,
+							vme.id id,
+							vme.num num,
+							vme.name name,
+							vme.aid aid,
+							vme.summaryflag summaryflag,
+							vme.identityType identityType,
+							vme.beginTime beginTime
+							FROM `v_mem&amp;exp` vme,v_looksummary vls 
+							WHERE vme.id=vls.id 
+							AND vme.identityType=vls.identityType
+							AND pid=0
+							AND title=#{title})tableb			
+				ON tableb.aid=a.id
+				and aid=#{assistant}
+				WHERE str_to_date(substring_index(#{title}, '-', -1),'%Y/%m/%d')>beginTime
+				ORDER BY num		
+            </when>
+
+	        <otherwise> 
+	        SELECT 
+			tablea.sid sid,
+			tablea.title title,
+			tablea.content content,
+			tablea.ischeckval ischeckval,
+			tablea.time time,
+			tablea.id id,
+			tablea.num num,
+			tablea.name name,
+			tablea.aid aid,
+			tablea.summaryflag summaryflag,
+			tablea.identityType identityType,
+			a.realname arealname 
+			from  admin a LEFT JOIN(			 
+	            select 
+					v.sid sid,
+					v.title title,
+					v.content content,
+					v.ischeckval ischeckval,
+					v.time time,
+					v.id id,
+					v.num num,
+					v.name name,
+					v.aid aid,
+					v.summaryflag summaryflag,
+					v.identityType identityType
+				from v_looksummary v
+				 <where>  
+				 	pid=0
+	        		<if test="checkType=='checked'">  
+	        			AND v.ischeckval=1  
+	        		</if>  
+	        		<if test="checkType=='nonchecked'">  
+	        			AND v.ischeckval=0  
+	        		</if>    
+	    		</where>  AND name=#{ownerType})tablea     		
+				ON tablea.aid=a.id 
+				where aid=#{assistant}
+				ORDER BY num   
+	         </otherwise>  
+         </choose>
+		</when>
+		<otherwise>
+			<choose>  
+            <when test="weekType!=null and weekType!='' and weekType!='all' and checkType=='all' and ownerType=='所有人'">  
+	           SELECT 
+				tableb.sid sid,
+				tableb.title title,
+				tableb.content content,
+				tableb.ischeckval ischeckval,
+				tableb.time time,
+				tableb.id id,
+				tableb.num num,
+				tableb.name name,
+				tableb.aid aid,
+				tableb.summaryflag summaryflag,
+				tableb.identityType identityType,
+				tableb.beginTime beginTime,
+				a.realname arealname 
+				FROM(
+				SELECT 
+				vls.sid sid,
+				vls.title title,
+				vls.content content,
+				vls.ischeckval ischeckval,
+				vls.time time,
+				tablea.id id,
+				tablea.num num,
+				tablea.name name,
+				tablea.aid aid,
+				tablea.summaryflag summaryflag,
+				tablea.identityType identityType,
+				tablea.beginTime beginTime
+				FROM(
+							SELECT 
+										vme.id id,
+										vme.num num,
+										vme.name name,
+										vme.aid aid,
+										vme.summaryflag summaryflag,
+										vme.identityType identityType,
+										vme.beginTime beginTime										
+							FROM `v_mem&amp;exp` vme 
+							WHERE vme.summaryflag=1)tablea 
+				LEFT JOIN v_looksummary vls
+				ON tablea.id=vls.id 
+				AND tablea.identityType=vls.identityType
+				AND title=#{title} 	AND pid=0 
+				UNION
+				SELECT 
+							vls.sid sid,
+							vls.title title,
+							vls.content content,
+							vls.ischeckval ischeckval,
+							vls.time time,
+							vme.id id,
+							vme.num num,
+							vme.name name,
+							vme.aid aid,
+							vme.summaryflag summaryflag,
+							vme.identityType identityType,
+							vme.beginTime beginTime
+							FROM `v_mem&amp;exp` vme,v_looksummary vls 
+							WHERE vme.id=vls.id 
+							AND vme.identityType=vls.identityType
+							AND pid=0
+							AND title=#{title})tableb
+				LEFT JOIN admin a
+				ON tableb.aid=a.id
+				WHERE str_to_date(substring_index(#{title}, '-', -1),'%Y/%m/%d')>beginTime
+				ORDER BY num		
+            </when>
+
+	        <otherwise> 
+	        SELECT 
+			tablea.sid sid,
+			tablea.title title,
+			tablea.content content,
+			tablea.ischeckval ischeckval,
+			tablea.time time,
+			tablea.id id,
+			tablea.num num,
+			tablea.name name,
+			tablea.aid aid,
+			tablea.summaryflag summaryflag,
+			tablea.identityType identityType,
+			a.realname arealname 
+			from(			 
+	            select 
+					v.sid sid,
+					v.title title,
+					v.content content,
+					v.ischeckval ischeckval,
+					v.time time,
+					v.id id,
+					v.num num,
+					v.name name,
+					v.aid aid,
+					v.summaryflag summaryflag,
+					v.identityType identityType
+				from v_looksummary v
+				 <where>  
+				 	pid=0
+	        		<if test="checkType=='checked'">  
+	        			AND v.ischeckval=1  
+	        		</if>  
+	        		<if test="checkType=='nonchecked'">  
+	        			AND v.ischeckval=0  
+	        		</if>    
+	     		    <if test="ownerType=='自己'">  
+	        			AND v.id=#{id}      			
+							<if test="identityType=='member'">  
+	        					AND v.identityType=1  
+	        				</if>
+	        				<if test="identityType=='experience'">  
+			        			AND v.identityType=0  
+			        		</if>
+	        		</if>
+	        		<if test="ownerType!='自己'">  
+	        			AND v.name=#{ownerType}  
+	        		</if>
+					<if test="identityType=='member'">  
+	        			AND v.identityType=1  
+	        		</if>
+					<if test="identityType=='experience'">  
+	        			AND v.identityType=0  
+	        		</if>
+	        		 <if test="weekType!=null and weekType!='' and weekType!='all'">  
+	            		AND v.title=#{title}  
+	        		</if> 
+	    		</where> )tablea 
+	    		LEFT JOIN admin a
+				ON tablea.aid=a.id 
+				ORDER BY num,time desc   
+	         </otherwise>  
+         </choose>
+		</otherwise>
+		</choose>
+		
+			
+	</select>
+	<select id="getCurrentSummary" parameterType="entity.Summary" resultType="entity.Summary">
+		select * from summary 
+		<where>  
+			title=#{title} and pid=0
+			<if test="eid!=null and eid!=''">  
+           		AND eid=#{eid}  
+       		</if> 
+       		 <if test="mid!=null and mid!=''">  
+           		AND mid=#{mid}  
+       		</if> 
+        </where>
+		 
+	</select>
+	<select id="getSummaryInfoByPage" parameterType="dto.MemAndExpDTO"  resultMap="summaryInfo">
+		SELECT 
+		a.id aid,
+		a.realname arealname,
+		v.id vid,
+		v.identityType videntityType,
+		v.num vnum,
+		v.name vname,
+		v.summaryflag vsummaryflag
+		from admin a
+		LEFT JOIN `v_mem&amp;exp` v 
+		ON a.id=v.aid
+		ORDER BY aid,vsummaryflag DESC,videntityType DESC		 
+	</select>
+	<resultMap type="entity.MemAndExp" id="summaryInfo">
+		<id property="id" column="vid"/>
+		<result property="identityType" column="videntityType"/>
+		<result property="num" column="vnum"/>
+		<result property="name" column="vname"/>
+		<result property="summaryflag" column="vsummaryflag"/>
+		<collection property="admin" ofType="entity.Admin">
+			<id property="id" column="aid" />
+			<result property="realname" column="arealname" />
+		</collection>		
+	</resultMap>
+	<resultMap type="entity.Summary" id="allSumByweek">
+		<id property="id" column="id"/>
+		<result property="title" column="title"/>
+		<result property="content" column="content"/>
+		<result property="time" column="time"/>
+		<result property="ischeck" column="ischeckval"/>
+		<collection property="member" ofType="entity.Member">
+			<id property="id" column="mid" />
+			<result property="name" column="name" />
+			<result property="aid" column="aid" />
+		</collection>		
+	</resultMap>
+	<select id="getSummarysByMidByPage" parameterType="dto.SummaryDTO" resultType="entity.LookSummary">
+		<choose>
+		<when test="assistant!=0">
+		<choose>  
+            <when test="weekType!=null and weekType!='' and weekType!='all' and checkType=='all' and ownerType!='my' and ownerType!='others'">  
+	           SELECT 
+				tableb.sid sid,
+				tableb.title title,
+				tableb.content content,
+				tableb.ischeckval ischeckval,
+				tableb.time time,
+				tableb.id id,
+				tableb.num num,
+				tableb.name name,
+				tableb.aid aid,
+				tableb.summaryflag summaryflag,
+				tableb.identityType identityType,
+				tableb.beginTime beginTime,
+				a.realname arealname 
+				FROM  admin a LEFT JOIN(
+				SELECT 
+				vls.sid sid,
+				vls.title title,
+				vls.content content,
+				vls.ischeckval ischeckval,
+				vls.time time,
+				tablea.id id,
+				tablea.num num,
+				tablea.name name,
+				tablea.aid aid,
+				tablea.summaryflag summaryflag,
+				tablea.identityType identityType,
+				tablea.beginTime beginTime
+				FROM(
+							SELECT 
+										vme.id id,
+										vme.num num,
+										vme.name name,
+										vme.aid aid,
+										vme.summaryflag summaryflag,
+										vme.identityType identityType,
+										vme.beginTime beginTime										
+							FROM `v_mem&amp;exp` vme 
+							WHERE vme.summaryflag=1 AND vme.num=#{cnum})tablea 
+				LEFT JOIN v_looksummary vls
+				ON tablea.id=vls.id 
+				AND tablea.identityType=vls.identityType
+				AND title=#{title} 	AND pid=0 AND vls.num=#{cnum}
+				UNION
+				SELECT 
+							vls.sid sid,
+							vls.title title,
+							vls.content content,
+							vls.ischeckval ischeckval,
+							vls.time time,
+							vme.id id,
+							vme.num num,
+							vme.name name,
+							vme.aid aid,
+							vme.summaryflag summaryflag,
+							vme.identityType identityType,
+							vme.beginTime beginTime
+							FROM `v_mem&amp;exp` vme,v_looksummary vls 
+							WHERE vme.id=vls.id 
+							AND vme.identityType=vls.identityType
+							AND pid=0
+							AND vme.num=#{cnum}
+							AND title=#{title})tableb			
+				ON tableb.aid=a.id
+				and aid=#{assistant}
+				WHERE str_to_date(substring_index(#{title}, '-', -1),'%Y/%m/%d')>beginTime AND num=#{cnum}
+				ORDER BY num		
+            </when>
+
+	        <otherwise> 
+	        SELECT 
+			tablea.sid sid,
+			tablea.title title,
+			tablea.content content,
+			tablea.ischeckval ischeckval,
+			tablea.time time,
+			tablea.id id,
+			tablea.num num,
+			tablea.name name,
+			tablea.aid aid,
+			tablea.summaryflag summaryflag,
+			tablea.identityType identityType,
+			a.realname arealname 
+			from  admin a LEFT JOIN(			 
+	            select 
+					v.sid sid,
+					v.title title,
+					v.content content,
+					v.ischeckval ischeckval,
+					v.time time,
+					v.id id,
+					v.num num,
+					v.name name,
+					v.aid aid,
+					v.summaryflag summaryflag,
+					v.identityType identityType
+				from v_looksummary v
+				 where  
+				 	pid=0 AND v.num=#{cnum}
+	        		<if test="checkType=='checked'">  
+	        			AND v.ischeckval=1  
+	        		</if>  
+	        		<if test="checkType=='nonchecked'">  
+	        			AND v.ischeckval=0  
+	        		</if>    
+	    		 )tablea     		
+				ON tablea.aid=a.id 
+				where aid=#{assistant} AND num=#{cnum}
+				ORDER BY num   
+	         </otherwise>  
+         </choose>
+		</when>
+		<otherwise>
+			<choose>  
+            <when test="weekType!=null and weekType!='' and weekType!='all' and checkType=='all' and ownerType!='my' and ownerType!='others'">  
+	           SELECT 
+				tableb.sid sid,
+				tableb.title title,
+				tableb.content content,
+				tableb.ischeckval ischeckval,
+				tableb.time time,
+				tableb.id id,
+				tableb.num num,
+				tableb.name name,
+				tableb.aid aid,
+				tableb.summaryflag summaryflag,
+				tableb.identityType identityType,
+				tableb.beginTime beginTime,
+				a.realname arealname 
+				FROM(
+				SELECT 
+				vls.sid sid,
+				vls.title title,
+				vls.content content,
+				vls.ischeckval ischeckval,
+				vls.time time,
+				tablea.id id,
+				tablea.num num,
+				tablea.name name,
+				tablea.aid aid,
+				tablea.summaryflag summaryflag,
+				tablea.identityType identityType,
+				tablea.beginTime beginTime
+				FROM(
+							SELECT 
+										vme.id id,
+										vme.num num,
+										vme.name name,
+										vme.aid aid,
+										vme.summaryflag summaryflag,
+										vme.identityType identityType,
+										vme.beginTime beginTime										
+							FROM `v_mem&amp;exp` vme 
+							WHERE vme.summaryflag=1 AND vme.num=#{cnum})tablea 
+				LEFT JOIN v_looksummary vls
+				ON tablea.id=vls.id 
+				AND tablea.identityType=vls.identityType
+				AND title=#{title} 	AND pid=0 
+				UNION
+				SELECT 
+							vls.sid sid,
+							vls.title title,
+							vls.content content,
+							vls.ischeckval ischeckval,
+							vls.time time,
+							vme.id id,
+							vme.num num,
+							vme.name name,
+							vme.aid aid,
+							vme.summaryflag summaryflag,
+							vme.identityType identityType,
+							vme.beginTime beginTime
+							FROM `v_mem&amp;exp` vme,v_looksummary vls 
+							WHERE vme.id=vls.id AND vme.num=#{cnum} 
+							AND vme.identityType=vls.identityType
+							AND pid=0
+							AND title=#{title})tableb
+				LEFT JOIN admin a
+				ON tableb.aid=a.id
+				WHERE str_to_date(substring_index(#{title}, '-', -1),'%Y/%m/%d')>beginTime AND num=#{cnum}
+				ORDER BY num		
+            </when>
+
+	        <otherwise> 
+	        SELECT 
+			tablea.sid sid,
+			tablea.title title,
+			tablea.content content,
+			tablea.ischeckval ischeckval,
+			tablea.time time,
+			tablea.id id,
+			tablea.num num,
+			tablea.name name,
+			tablea.aid aid,
+			tablea.summaryflag summaryflag,
+			tablea.identityType identityType,
+			a.realname arealname 
+			from(			 
+	            select 
+					v.sid sid,
+					v.title title,
+					v.content content,
+					v.ischeckval ischeckval,
+					v.time time,
+					v.id id,
+					v.num num,
+					v.name name,
+					v.aid aid,
+					v.summaryflag summaryflag,
+					v.identityType identityType
+				from v_looksummary v
+				 <where>  
+				 	pid=0 AND v.num=#{cnum}
+	        		<if test="checkType=='checked'">  
+	        			AND v.ischeckval=1  
+	        		</if>  
+	        		<if test="checkType=='nonchecked'">  
+	        			AND v.ischeckval=0  
+	        		</if>    
+	     		    <if test="ownerType=='my'">  
+	        			AND v.id=#{id}      			
+							<if test="identityType=='member'">  
+	        					AND v.identityType=1  
+	        				</if>
+	        				<if test="identityType=='experience'">  
+			        			AND v.identityType=0  
+			        		</if>
+	        		</if>
+	        		<if test="ownerType=='others'">  
+	        			AND v.id!=#{id}  
+	        		</if>
+					<if test="identityType=='member'">  
+	        			AND v.identityType=1  
+	        		</if>
+					<if test="identityType=='experience'">  
+	        			AND v.identityType=0  
+	        		</if>
+	        		 <if test="weekType!=null and weekType!='' and weekType!='all'">  
+	            		AND v.title=#{title}  
+	        		</if> 
+	    		</where> )tablea 
+	    		LEFT JOIN admin a
+				ON tablea.aid=a.id
+				where num=#{cnum} 
+				ORDER BY num   
+	         </otherwise>  
+         </choose>
+		</otherwise>
+		</choose>
+	</select>
+	<select id="checkHaveSumByNum" parameterType="String" resultType="int">
+		select count(*) from v_looksummary where num=#{cnum}
+	</select>
+	<insert id="addSummaryVisit" parameterType="entity.SummaryVisit">
+		insert into summary_visit (sid,flag,name) values(#{sid},#{flag},#{name})
+	</insert>
+	<select id="checkSummaryVisit" parameterType="entity.SummaryVisit" resultType="int">
+		select count(*) from summary_visit where sid = #{sid} and  flag = #{flag} and name = #{name}
+	</select>
+	<select id="getSummaryVisit" parameterType="int" resultType="entity.SummaryVisit">
+		select * from summary_visit where sid = #{sid}
+	</select>
+	<delete id="delSummaryVisitBySid" parameterType="int">
+		delete from summary_visit where sid = #{sid}
+	</delete>
+	<select id="getCommentById" parameterType="int" resultType="entity.Summary">
+		select * from summary where	id=#{id}
+	</select>
+	<update id="updateComment" parameterType="entity.Summary">
+		update summary set content=#{content} where id=#{id}
+	</update>
+	<select id="getSummarys" parameterType="dto.SummaryDTO"
+		resultMap="summarysinfo">
+		<choose>
+			<when test="weekType=='all'">
+				select * from v_getsummarys where
+				<if test=" checkType=='all' ">
+					ischeckval=ischeckval
+				</if>
+				<if test=" checkType=='checked' ">
+					ischeckval=1
+				</if>
+				<if test=" checkType=='nonchecked' ">
+					ischeckval=0
+				</if>
+				<if test="assistant==0">
+					and realname=realname
+				</if>
+				<if test="assistant!=0">
+					and realname=(select realname from admin where
+					id=#{assistant})
+				</if>
+				<if test=" ownerType=='my' or ownerType=='all'  ">
+					<if test=" ownerType=='my' ">
+						<if test=" identityType=='member'">
+							and mid=#{id}
+						</if>
+						<if test=" identityType=='experience'">
+							and eid=#{id}
+						</if>
+					</if>
+					<if test=" ownerType=='all' ">
+						and sid=sid
+					</if>
+				</if>
+				<if test=" ownerType!='my' and ownerType!='all'  ">
+					and mname=#{ownerType}
+				</if>
+			</when>
+			<otherwise>
+				SELECT
+				*
+				from
+				(
+				SELECT
+				distinct (@sid:=@sid-1) AS sid,
+				'' AS title,
+				0 AS
+				ischeckval,
+				NULL AS time,
+				mid AS mid,
+				a.mname AS mname,
+				mnum AS mnum,
+				eid
+				AS eid,
+				a.ename AS ename,
+				enum AS enum,
+				a.aid as aid,
+				a.realname AS
+				realname
+				FROM
+				(
+				SELECT
+				0 as sid,
+				m.id AS mid,
+				m. NAME AS mname,
+				u. NAME AS
+				mnum,
+				0 AS eid,
+				'' AS ename,
+				'' AS enum,
+				a.id as aid,
+				a.realname AS
+				realname
+				FROM
+				member m,
+				admin a,
+				user u
+				WHERE
+				m.summaryflag = 1
+				AND m.flag
+				=
+				1
+				AND m.uid = u.id
+				AND m.id NOT IN (
+				SELECT
+				mid AS id
+				FROM
+				summary s
+				WHERE
+				<if test="weekType=='current' ">
+					s.time >DATE_ADD(str_to_date(substring_index(#{title},
+					'-',
+					1),'%Y/%m/%d'), INTERVAL 3 DAY)
+					AND
+					DATE_ADD(str_to_date(substring_index(#{title}, '-',
+					-1),'%Y/%m/%d'),
+					INTERVAL 3 DAY)> s.time
+				</if>
+				<if test="weekType=='next' ">
+					s.time >DATE_ADD(str_to_date(substring_index(#{title},
+					'-',
+					1),'%Y/%m/%d'), INTERVAL 10 DAY)
+					AND
+					DATE_ADD(str_to_date(substring_index(#{title}, '-',
+					-1),'%Y/%m/%d'),
+					INTERVAL 10 DAY)> s.time
+				</if>
+				<if test="weekType=='previous' ">
+					s.time >DATE_SUB(str_to_date(substring_index(#{title},
+					'-',
+					1),'%Y/%m/%d'), INTERVAL 4 DAY)
+					AND
+					DATE_SUB(str_to_date(substring_index(#{title}, '-',
+					-1),'%Y/%m/%d'),
+					INTERVAL 4 DAY)> s.time
+				</if>
+				AND pid = 0
+				)
+				AND m.aid = a.id
+				UNION ALL
+				SELECT
+				0 as sid,
+				0 AS mid,
+				'' AS
+				mname,
+				'' AS mnum,
+				e.id AS eid,
+				e. NAME AS ename,
+				e.num AS enum,
+				a.id as
+				aid,
+				a.realname AS realname
+				FROM
+				experience e,
+				admin a
+				WHERE
+				e.summaryflag
+				= 1
+				<if test="weekType=='current' ">
+					AND str_to_date(substring_index(#{title}, '-',
+					1),'%Y/%m/%d')>e.beginTime
+				</if>
+				<if test="weekType=='next' ">
+					AND DATE_ADD(str_to_date(substring_index(#{title}, '-',
+					1),'%Y/%m/%d'),
+					INTERVAL 7 DAY)>e.beginTime
+				</if>
+				<if test="weekType=='previous' ">
+					AND DATE_SUB(str_to_date(substring_index(#{title}, '-',
+					1),'%Y/%m/%d'),
+					INTERVAL 7 DAY)>e.beginTime
+				</if>
+				AND e.id NOT IN (
+				SELECT
+				eid AS id
+				FROM
+				summary s
+				WHERE
+				<if test="weekType=='current' ">
+					s.time >DATE_ADD(str_to_date(substring_index(#{title},
+					'-',
+					1),'%Y/%m/%d'), INTERVAL 3 DAY)
+					AND
+					DATE_ADD(str_to_date(substring_index(#{title}, '-',
+					-1),'%Y/%m/%d'),
+					INTERVAL 3 DAY)> s.time
+				</if>
+				<if test="weekType=='next' ">
+					s.time >DATE_ADD(str_to_date(substring_index(#{title},
+					'-',
+					1),'%Y/%m/%d'), INTERVAL 10 DAY)
+					AND
+					DATE_ADD(str_to_date(substring_index(#{title}, '-',
+					-1),'%Y/%m/%d'),
+					INTERVAL 10 DAY)> s.time
+				</if>
+				<if test="weekType=='previous' ">
+					s.time >DATE_SUB(str_to_date(substring_index(#{title},
+					'-',
+					1),'%Y/%m/%d'), INTERVAL 4 DAY)
+					AND
+					DATE_SUB(str_to_date(substring_index(#{title}, '-',
+					-1),'%Y/%m/%d'),
+					INTERVAL 4 DAY)> s.time
+				</if>
+				AND pid = 0
+				)
+				AND e.aid = a.id
+				) a,
+				(SELECT @sid:=0) AS it
+				UNION ALL
+				SELECT
+				*
+				FROM
+				v_getsummarys b
+				WHERE
+				<if test="weekType=='current' ">
+					b.time >DATE_ADD(str_to_date(substring_index(#{title},
+					'-',
+					1),'%Y/%m/%d'), INTERVAL 3 DAY)
+					AND
+					DATE_ADD(str_to_date(substring_index(#{title}, '-',
+					-1),'%Y/%m/%d'),
+					INTERVAL 3 DAY)> b.time
+				</if>
+				<if test="weekType=='next' ">
+					b.time >DATE_ADD(str_to_date(substring_index(#{title},
+					'-',
+					1),'%Y/%m/%d'), INTERVAL 10 DAY)
+					AND
+					DATE_ADD(str_to_date(substring_index(#{title}, '-',
+					-1),'%Y/%m/%d'),
+					INTERVAL 10 DAY)> b.time
+				</if>
+				<if test="weekType=='previous' ">
+					b.time >DATE_SUB(str_to_date(substring_index(#{title},
+					'-',
+					1),'%Y/%m/%d'), INTERVAL 4 DAY)
+					AND
+					DATE_SUB(str_to_date(substring_index(#{title}, '-',
+					-1),'%Y/%m/%d'),
+					INTERVAL 4 DAY)> b.time
+				</if>
+				ORDER BY
+				enum,
+				mnum
+				)sum
+				where
+				<if test=" checkType=='all' ">
+					sum.ischeckval=sum.ischeckval
+				</if>
+				<if test=" checkType=='checked' ">
+					sum.ischeckval=1
+				</if>
+				<if test=" checkType=='nonchecked' ">
+					sum.ischeckval=0
+				</if>
+				<if test="assistant==0">
+					and sum.realname=sum.realname
+				</if>
+				<if test="assistant!=0">
+					and sum.realname=(select realname from admin where
+					id=#{assistant})
+				</if>
+				<if test=" ownerType=='my' or ownerType=='all'  ">
+					<if test=" ownerType=='my' ">
+						<if test=" identityType=='member'">
+							and mid=#{id}
+						</if>
+						<if test=" identityType=='experience'">
+							and eid=#{id}
+						</if>
+					</if>
+					<if test=" ownerType=='all' ">
+						and sid=sid
+					</if>
+				</if>
+				<if test=" ownerType!='my' and ownerType!='all'  ">
+					and mname=#{ownerType}
+				</if>
+			</otherwise>
+		</choose>
+	</select>
+	<resultMap type="entity.Summary" id="summarysinfo">
+		<id property="id" column="sid" />
+		<result property="ischeck" column="ischeckval" />
+		<result property="time" column="time" />
+		<result property="title" column="title" />
+		<collection property="admin" ofType="entity.Admin">
+			<id property="id" column="aid" />
+			<result property="realname" column="realname" />
+		</collection>
+		<collection property="member" ofType="entity.Member">
+			<id property="id" column="mid" />
+			<result property="name" column="mname" />
+			<collection property="user" ofType="entity.User">
+				<id property="name" column="mnum" />
+			</collection>
+		</collection>
+		<collection property="experience" ofType="entity.Experience">
+			<result property="id" column="eid" />
+			<result property="name" column="ename" />
+			<result property="num" column="enum" />
+		</collection>
+	</resultMap>
+	<select id="getExperienceSummarys" parameterType="String" resultType="entity.LookSummary">
+	        	SELECT
+					v.time,
+					v.title,
+					v. name,
+					a.realname arealname,
+					v.ischeckval,
+					v.sid,
+					v.identityType
+				FROM
+					v_looksummary v
+				LEFT JOIN admin a ON v.aid = a.id
+				 where 
+				 	v. name = #{name}
+					AND v.pid = 0  	
+				ORDER BY v.time desc   	
+	</select>
+</mapper>

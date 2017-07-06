@@ -1,0 +1,93 @@
+.mywridiv{
+	background-color: #FFFFFF;
+	width: 700px;
+	height: 50px;
+	border-radius: 5px;
+	margin-left: 20px;
+}
+.mywridivspan{
+	font-size: 20px;
+	font-weight: 600;
+	position: relative;
+	top: 16px;
+	left: 50px;
+}
+.mywridivspan2{
+	font-weight: 800;
+	position: relative;
+	top: 16px;
+	left: 320px;
+	cursor: pointer;
+}
+.mywridivspan3{
+	font-weight: 800;
+	position: relative;
+	top: 16px;
+	left: 340px;
+	cursor: pointer;
+}
+.mywridivspan4{
+	font-weight: 800;
+	position: relative;
+	top: 16px;
+	left: 360px;
+	cursor: pointer;
+}
+#contentdiv{
+	width:700px; 
+	background-color:#FFFFFF;
+	margin-left:20px;
+}
+.allfontspan{
+	font-weight: 600;
+	position: relative;
+	top: 19px;
+	left: 50px;
+}
+.allfontspan2{
+	position: relative; 
+	top: 19px;
+	margin-right: 50px;
+	float: right;
+}
+.condiv{
+	position: relative;
+	left: 50px;
+	width: 585px;
+}
+.condivtil{
+	font-size: 14px;
+	font-weight: 600;
+	color:#006699;
+}
+.condivicon{
+	float: right; 
+	margin-right: 50px;
+}
+.icon1iner{
+	position: relative;
+	top: -2px;
+}
+.paging{
+	background-color:#FFFFFF;
+	position: relative; 
+	margin-left: 20px;
+	top: -20px;
+	width: 700px; 
+	height: 50px;
+}
+.paingdivinner{
+	position: relative;
+	top: 13px;
+	float: right;
+	margin-right: 65px;
+}
+#back{
+	margin-right: 140px;
+}
+#contentdivcom{
+	width:600px; 
+	position: relative;
+	left: 55px; 
+	background-color:#FFFFFF;
+}

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="mapper.OndutyMapper">	
+	<insert id="apply" parameterType="entity.OnDuty" useGeneratedKeys="true" keyProperty="id">
+		insert into onduty(mid,start,end,time,flag,`read`) values (#{mid},#{start},#{end},#{time},#{flag},#{read})
+	</insert>
+	<select id="getByPage" parameterType="dto.OndutyDTO" resultType="map">
+		select onduty.id id,name,mid,DATE_FORMAT(start,'%Y-%m-%d %H:%i') start,DATE_FORMAT(end,'%Y-%m-%d %H:%i') end,DATE_FORMAT(onduty.time,'%Y-%m-%d %H:%i:%k') time,onduty.flag flag,DATE_FORMAT(`read`,'%Y-%m-%d %H:%i:%k') 'read' from onduty left join member on mid=member.id 
+		where start 
+		<if test="date!=null">		
+		like #{date} 
+		</if>
+		<if test="mid!=null">
+		and mid = #{mid} 
+		</if>
+		<if test="start!=null">
+		 &gt;= #{start} 
+		</if>
+		<if test="end!=null">
+		and end &lt;= #{end} 
+		</if>
+		order by  time desc 
+	</select>
+	<select id="getuname" parameterType="java.lang.String" resultType="java.lang.String">
+		select user.name from member left join user on uid = user.id where member.name=#{name}  group by `user`.name asc
+	</select>
+	<select id="getmid" parameterType="java.lang.String" resultType="int">
+		select v_member.id id from v_member where v_member.num=#{uname} limit 1
+	</select>
+	<update id="update" parameterType="entity.OnDuty" >
+		update onduty set flag=#{flag}, `read`=#{read} where id =#{id}
+	</update>
+	<delete id="del">
+		delete from onduty where id=#{id}
+	</delete>
+	<select id="getOndutyByMidByPage" parameterType="dto.OndutyDTO" resultType="map">
+		select onduty.id id,name,mid,DATE_FORMAT(start,'%Y-%m-%d %H:%i') start,DATE_FORMAT(end,'%Y-%m-%d %H:%i') end,DATE_FORMAT(onduty.time,'%Y-%m-%d %H:%i:%k') time,onduty.flag flag,DATE_FORMAT(`read`,'%Y-%m-%d %H:%i:%k') 'read' from onduty left join member on mid=member.id 
+		where mid = #{mid} 
+		order by  time desc 
+	</select>
+	<update id="setFlag" parameterType="entity.OnDuty">
+		update onduty set flag=1,`read`=#{read} where id=#{id}
+	</update>
+	<select id="getAllByPage" parameterType="dto.OndutyDTO" resultType="map">
+		select onduty.id id,name,mid,DATE_FORMAT(start,'%Y-%m-%d %H:%i') start,DATE_FORMAT(end,'%Y-%m-%d %H:%i') end,DATE_FORMAT(onduty.time,'%Y-%m-%d %H:%i:%k') time,onduty.flag flag,DATE_FORMAT(`read`,'%Y-%m-%d %H:%i:%k') 'read' from onduty left join member on mid=member.id 
+		<if test="start!=null and end!=null">
+		where start &gt;= #{start} and end &lt;= #{end}
+		</if>
+		<if test="mid!=0 and start==null and end==null">
+		where mid = #{mid} 
+		</if>
+		<if test="mid!=0 and start!=null and end!=null">
+		and mid = #{mid} 
+		</if>
+		order by  time desc 
+	</select>
+	<select id="getAllMidByFlag" resultType="entity.OnDuty">
+		SELECT * FROM onduty WHERE flag = 0 GROUP BY mid
+	</select>
+	<select id="getOndutyByMidAndFlag" resultType="entity.OnDuty">
+		SELECT * FROM onduty where mid = #{mid} and flag = 0 GROUP BY start desc
+	</select>
+	<select id="getOndutyByid" resultType="entity.OnDuty">
+		SELECT * FROM onduty WHERE id = #{id}
+	</select>
+</mapper>

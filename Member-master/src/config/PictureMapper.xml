@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="mapper.PictureMapper">	
+<update  id="modifyPicture" parameterType="entity.Picture">
+	update picture set photo=#{photo},title=#{title},time=#{time},flag=#{flag},cover=#{cover},share=#{share},url=#{url} where id=#{id}
+</update>
+<update  id="flag" parameterType="entity.Picture">
+	update picture set flag=#{flag} where id=#{id}
+</update>
+<update  id="modifykey" parameterType="entity.Picture">
+	update picture set share=#{share} where id=#{id}
+</update>
+<delete  id="delete" parameterType="entity.Picture">
+	delete from picture where id=#{id}
+</delete>
+<delete  id="deleteUserCover" parameterType="int">
+	delete from picture where uid=#{uid} and cover=1
+</delete>
+<delete  id="deleteUserFlagCover" parameterType="int">
+	delete from picture where uid=#{uid} and flag=0
+</delete>
+<delete  id="deleteCheckedUserCover" parameterType="int">
+	delete from picture where uid=#{uid} and cover=1 and flag=1
+</delete>
+<insert  id="addPicture" parameterType="entity.Picture"  useGeneratedKeys="true" keyProperty="id">
+	insert into picture(uid,photo,title,time,share,flag,cover,url) values (#{user.id},#{photo},#{title},#{time},#{share},#{flag},#{cover},#{url});
+</insert>
+<select id="getPicture" parameterType="entity.Picture" resultType="entity.Picture">
+		select * from picture where cover=0 and uid=#{uid}
+</select>
+<select id="getOne" parameterType="entity.Picture" resultType="entity.Picture">
+		select * from picture where id=#{id}
+</select>
+<select id="getCover" parameterType="entity.Picture" resultType="entity.Picture">
+		select * from picture where cover=1 and flag=1 and uid=#{uid} order by time desc limit 0,1;
+</select>
+<select id="getUserPicture" parameterType="entity.Picture" resultType="entity.Picture">
+		select * from picture where flag=0 and cover=0 and uid=#{uid}
+</select>
+<select id="getUserFlagPicture" parameterType="entity.Picture" resultType="entity.Picture">
+		select * from picture where flag=0 and uid=#{uid}
+</select>
+<select id="getUserPictureByPage" parameterType="dto.PictureDTO" resultType="entity.Picture">
+		select * from picture where flag=0 and uid=#{uid}
+</select>
+<select id="getAllUserCoverByPage" parameterType="dto.PictureDTO" resultMap="usercover">
+		SELECT 
+		tablea.uid uid, 
+		tablea.num num, 
+		tablea.mid mid,
+		tablea.name name,
+		tablea.sex sex,
+		tablea.provname provname,
+		tablea.seat_provname seat_provname,
+		p.id pid
+				from(
+				select
+				u.id uid, 
+				u.name num, 
+				m.id mid,
+				m.name name,
+				m.sex sex,
+				m.provname provname,
+				m.seat_provname seat_provname
+				from `user` u,v_reconfiguration_relay_member m
+				WHERE u.id = m.uid and m.flag=1
+				) tablea
+		LEFT JOIN picture p
+		ON tablea.uid=p.uid and cover=1 and flag=1
+		Order by num
+</select>
+<select id="getAllUserCoverInThisSchoolByPage" parameterType="dto.PictureDTO" resultMap="usercover">
+			SELECT 
+		tablea.uid uid, 
+		tablea.num num, 
+		tablea.mid mid,
+		tablea.name name,
+		tablea.sex sex,
+		tablea.provname provname,
+		tablea.seat_provname seat_provname,
+		p.id pid
+				from(
+				select
+				u.id uid, 
+				u.name num, 
+				m.id mid,
+				m.name name,
+				m.sex sex,
+				m.provname provname,
+				m.seat_provname seat_provname
+				from `user` u,v_reconfiguration_relay_member m
+				WHERE u.id = m.uid and m.flag=1 and m.school=#{school}
+				) tablea
+		LEFT JOIN picture p
+		ON tablea.uid=p.uid and cover=1 and flag=1
+		Order by num
+</select>
+<select id="getAllFlagUserCoverByPage" parameterType="dto.PictureDTO" resultMap="usercover">
+		SELECT 
+		tablea.uid uid, 
+		tablea.num num, 
+		tablea.mid mid,
+		tablea.name name,
+		tablea.sex sex,
+		tablea.provname provname,
+		tablea.seat_provname seat_provname,
+		p.id pid
+				from(
+				select
+				u.id uid, 
+				u.name num, 
+				m.id mid,
+				m.name name,
+				m.sex sex,
+				m.provname provname,
+				m.seat_provname seat_provname
+				from `user` u,v_reconfiguration_relay_member m
+				WHERE u.id = m.uid and m.flag=1
+				) tablea
+		LEFT JOIN picture p
+		ON tablea.uid=p.uid and cover=1 and flag=0
+		Order by num
+</select>
+<select id="getpic" parameterType="entity.Picture" resultType="entity.Picture">
+		select * from picture where id=#{id}
+</select>
+<select id="count" parameterType="int" resultType="int">
+	 SELECT COUNT(*) FROM picture where cover=1 and uid=#{uid}
+</select>
+<select id="allcount" parameterType="int" resultType="int">
+	 SELECT COUNT(*) FROM picture where cover=0 and uid=#{uid}
+</select>
+<select id="getFlag" resultMap="userinfo" parameterType="entity.Picture">
+		select	
+				p.id    		  id,
+				p.flag            flag,
+				u.id			  uid,
+				u.name 			  name,		
+				m.id			  mid,
+				m.name 			  realName
+			from 
+				user u,member m,picture p
+            where p.flag=0
+			    and   u.id=p.uid
+			    and u.id=m.uid group by uid
+</select>
+<select id="getFlagByPage" resultMap="userinfo" parameterType="dto.PictureDTO">
+		select	
+				p.id    		  id,
+				p.flag            flag,
+				u.id			  uid,
+				u.name 			  name,		
+				m.id			  mid,
+				m.name 			  realName,
+				m.sex				sex
+			from 
+				user u,member m,picture p
+            where p.flag=0
+			    and   u.id=p.uid
+			    and u.id=m.uid group by uid
+</select>
+<insert id="addAdminCover" parameterType="entity.Picture">
+	INSERT INTO picture(uid,photo,title,time,cover) VALUES (#{uid},#{photo},#{title},#{time},#{cover});
+</insert>
+<update id="modifyAdminCover" parameterType="entity.Picture">
+	UPDATE picture SET photo=#{photo},title=#{title},time=#{time} where uid=#{uid}
+</update>
+<resultMap type="entity.Picture" id="userinfo">
+		<id column="id" property="id"/>
+		<result column="flag" property="flag"/>
+		<collection property="member" ofType="entity.Member">
+			<id column="mid" property="id"/>
+			<result column="sex" property="sex"/>
+			<result column="realName" property="name"/>
+		</collection>
+		<collection property="user" ofType="entity.User">
+			<result column="uid" property="id"/>
+			<result column="name" property="name"/>
+		</collection>
+</resultMap>
+<resultMap type="entity.User" id="usercover">
+		<id column="uid" property="id"/>
+		<result column="num" property="name"/>
+		<collection property="picture" ofType="entity.Picture">
+			<id column="pid" property="id"/>
+		</collection>
+		<collection property="member" ofType="entity.Member">
+			<id column="mid" property="id"/>
+			<result column="name" property="name"/>
+			<result column="sex" property="sex"/>
+			<result column="provname" property="provname"/>
+			<result column="seat_provname" property="seat_provname"/>
+		</collection>
+		
+</resultMap>
+</mapper>

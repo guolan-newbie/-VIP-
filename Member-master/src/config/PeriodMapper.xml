@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="mapper.PeriodMapper">	
+	<insert id="add" parameterType="entity.Period">
+		insert into period(mid,duetime,amount,minterest,restAmount) values (#{member.id},#{duetime},#{amount},#{minterest},#{restAmount})
+	</insert>
+	<select id="update" parameterType="entity.Period">
+		update period set restamount=#{restAmount} where id=#{id}
+	</select>
+	<select id="exists" parameterType="int" resultType="int">
+		select count(*) from period where mid=#{id}
+	</select>
+	<select id="getAllByPage" parameterType="dto.PeriodDTO" resultType="entity.Period">
+		select * from period where mid=#{mid} order by id
+	</select>
+	<select id="getAll" parameterType="int" resultType="entity.Period">
+		select * from period where mid=#{id} order by id
+	</select>
+	<select id="getPeriodByMid" parameterType="int" resultType="double">
+		select COALESCE(SUM(restamount),0) from period where mid=#{id} and duetime&lt;now();
+	</select>
+	<select id="getRestAmount" parameterType="int" resultType="Double">
+		select 
+			COALESCE(SUM(restamount),0)  
+		from
+			period
+		where
+			mid=#{mid}
+	</select>
+	<select id="getSum" parameterType="int" resultType="double">
+		select COALESCE(SUM(amount),0) from period where mid=#{id}
+	</select>
+	<select id="getFirst" parameterType="int" resultType="double">
+		SELECT amount from period where mid = #{id} order by id LIMIT 0,1
+	</select>
+	<select id="getLast" parameterType="int" resultType="double">
+		SELECT amount from period where mid = #{id} order by id desc LIMIT 0,1
+	</select>
+	<select id="getMonthly" parameterType="int" resultType="double">
+		select 
+			COALESCE(SUM(c.amount),0)
+		from
+			(select amount from period where mid=#{id} and amount !=0 order by id limit 1,1)c
+	</select>
+	<select id="getAllMonthByMid" parameterType="int" resultType="int">
+		select count(1) from period where mid=#{id}
+	</select>
+	<select id="getRestAmountByMid" parameterType="map" resultType="double">
+		select 
+			COALESCE(SUM(a.restamount-b.amount),0)  
+		from 
+			(select COALESCE(SUM(restamount),0) restamount from period where mid=#{mid} and duetime&lt;=#{date})a,
+			(select COALESCE(SUM(amount-restamount),0) amount from period where duetime&gt;#{date} and amount&gt;restamount and mid=#{mid})b
+	</select>
+	<delete id="deleteByMid" parameterType="int">	
+		delete from period WHERE period.mid=#{id}
+	</delete>
+	<select id="getSettlement" parameterType="int" resultType="entity.Period">
+		SELECT * FROM period WHERE mid = #{mid} AND amount &lt;&gt; restamount order by id
+	</select>
+	<select id="getAllByMid" parameterType="int" resultType="entity.Period">
+		select * from period where mid=#{mid} order by id
+	</select>
+	<select id="getUnpaidByMid" parameterType="int" resultType="double">
+		select ifnull(SUM(restamount),0) FROM period WHERE mid = #{mid} AND duetime &lt; DATE_SUB(curdate(),INTERVAL -1 DAY); 
+	</select>
+	<select id="getDelayMonthyByMid" parameterType="int" resultType="int">
+		select count(1) FROM period WHERE mid = #{mid} and amount = 0 
+	</select>
+</mapper>

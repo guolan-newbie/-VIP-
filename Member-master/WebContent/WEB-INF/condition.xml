@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+	    <conditions>
+	        <condition name="和我性别相同">
+	            <sql1>where sex=getSex$</sql1>
+	        	<shuxin>getSex</shuxin>
+	        </condition>
+	        <condition name="和我同个学校">
+	            <sql1>where school=getSchool$</sql1>
+	        	<shuxin>getSchool</shuxin>
+	        </condition>
+	        <!--  
+	        <condition name="和我同个学校并同个性别">
+	            <sql1>where school=getSchool$ and sex=getSex$</sql1>
+	            <sql2>where flag=0 and school=getSchool$ and sex=getSex$</sql2>
+	        	<shuxin>getSchool,getSex</shuxin>	        	
+	        </condition>
+	        -->
+	        <condition name = "和我同届毕业">
+	            <sql1>where YEAR(graduateDate) =getGraduateDate$</sql1>
+	            <shuxin>getGraduateDate</shuxin>
+	        </condition>
+	        <condition name = "和我同个城市">
+	            <sql1>where pname = getProvince.getName$</sql1>
+	            <shuxin>getProvince.getName</shuxin>
+	        </condition>
+	        <condition name="和我年龄差不多">
+	            <sql1>where age between getAge$-2 and getAge$+2  </sql1>
+	            <sql2>where flag=0 and age &gt; 0</sql2>
+	            <shuxin>getAge</shuxin>
+	        </condition>
+<!-- 	        <condition name="和我同出生地">
+	            <sql1>where seat_provid=getSeat_provid$  </sql1>
+	            <shuxin>getSeat_provid</shuxin>
+	        </condition> -->
+	    </conditions>

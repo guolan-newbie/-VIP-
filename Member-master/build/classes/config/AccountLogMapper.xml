@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="mapper.AccountLogMapper">
+	<insert id="add" parameterType="entity.AccountLog"
+		useGeneratedKeys="true" keyProperty="id">
+		insert into
+		accountlog(mid,amount,date,flag,type,photo,fileflag,upflag) values
+		(#{member.id},#{amount},#{date},#{flag},#{type},#{photo},#{fileflag},#{upflag})
+	</insert>
+	<select id="getAccountLogById" parameterType="int" resultType="entity.AccountLog">
+		select * from accountlog where id=#{id}
+	</select>
+	<select id="getAccountLogByMIdByPage" parameterType="dto.AccountLogDTO"
+		resultType="entity.AccountLog">
+		select * from accountlog where mid=#{mid} order by id
+	</select>
+	<select id="getAccountLogForCheck" parameterType="int"
+		resultType="entity.AccountLog">
+		select * from accountlog where flag=0 and mid=#{mid}
+	</select>
+	<update id="updateFlag" parameterType="entity.AccountLog">
+		update accountlog set
+		flag=#{flag},photo = null,type = null, fileflag = 0,rid=#{rid} where id=#{id}
+	</update>
+	<select id="getDateAmount" parameterType="string" resultType="int">
+		SELECT COALESCE(SUM(amount),0) from accountlog where date like
+		CONCAT(CONCAT('%', #{date}), '%');;
+	</select>
+	<select id="getDateDetail" parameterType="string" resultMap="amountInfo">
+		select
+		a.id,a.amount,m.name
+		from
+		accountlog a,member m
+		where
+		a.mid=m.id
+		and
+		a.date like CONCAT(CONCAT('%', #{date}), '%');
+	</select>
+	<select id="getAmountByMid" parameterType="map" resultType="double">
+		select COALESCE(SUM(a.amount),0) from accountlog a where mid=#{mid}
+		and a.date like CONCAT('%', SUBSTR(#{date} ,1,10), '%')
+	</select>
+	<select id="getLastAmountDateByMid" parameterType="int"
+		resultType="String">
+		SELECT DATE_FORMAT(date,'%Y-%c-%d') date from accountlog
+		WHERE mid=#{mid} ORDER BY id DESC LIMIT 1
+	</select>
+	<select id="getSumAmountByMid" parameterType="map" resultType="double">
+		select COALESCE(SUM(a.amount),0) from accountlog a where mid=#{mid}
+		and a.date &gt;#{start} and a.date&lt;=now();
+	</select>
+	<select id="getMemByAmount" parameterType="string" resultMap="memAmount">
+		select
+		distinct(m.id) id,m.name name,m.uid uname,m.time tday from
+		memberinfo m
+		where
+		substr(m.time,9,2) not like CONCAT('%',
+		SUBSTR(#{date} ,1,10), '%')
+		and
+		id in (select mid from accountlog where
+		date like CONCAT('%',
+		SUBSTR(#{date} ,1,10), '%'))
+		union
+		select
+		distinct(m.id) id,m.name name,m.uid uname,m.time tday from memberinfo
+		m
+		where
+		substr(m.time,9,2) like CONCAT('%', SUBSTR(#{date},9,2),'%')
+		and
+		id in (select DISTINCT(mid) from period where restamount&gt;0 and
+		duetime &lt;= #{date})
+		and
+		id not in(select mid from accountlog where
+		date like CONCAT('%',
+		SUBSTR(#{date} ,1,7), '%')) order by id
+	</select>
+	<select id="getMemByMonth1" parameterType="string" resultMap="memAmount">
+		select
+		distinct(m.id) id,m.name name,m.uid uname,m.time tday from
+		memberinfo m
+		where
+		id in (select mid from accountlog where date like
+		CONCAT('%',
+		SUBSTR(#{date} ,1,7), '%'))
+		union
+		select
+		distinct(m.id)
+		id,m.name name,m.uid uname,m.time tday from memberinfo m
+		where
+		id in
+		(select DISTINCT(mid) from period where restamount&gt;0 and
+		duetime
+		&lt;= #{date}) order by id
+	</select>
+	<select id="getMemByMonth" parameterType="string" resultMap="memAmount">
+		select
+		m.id id,m.name name,m.uid uname,m.time tday,a.date date from
+		memberinfo m
+		right join accountlog a on a.mid=m.id where date like
+		CONCAT('%',
+		SUBSTR(#{date} ,1,7), '%')
+		union
+		select
+		m.id id,m.name
+		name,m.uid uname,m.time tday,NULL date from memberinfo m
+		where
+		id in
+		(select DISTINCT(mid) from period where restamount&gt;0 and
+		duetime
+		&lt;=#{date})
+		and id not in (select mid from accountlog where date like
+		CONCAT('%',
+		SUBSTR(#{date} ,1,7), '%'))
+		order by id,date
+	</select>
+	<select id="getMidByAmount" parameterType="map" resultMap="memAmount">
+		select
+		m.id id,m.name name,m.uid uname,m.time tday,a.date date from
+		memberinfo
+		m,accountlog a
+		where a.mid=m.id and date between #{start} and
+		#{end}
+		union
+		select
+		distinct(m.id) id,m.name name,m.uid uname,m.time
+		tday,NULL date from
+		memberinfo m,period p
+		where
+		m.id=mid and
+		restamount&gt;0 and duetime&lt;#{end}
+		<if test="type==1">
+			and day(m.time)=day(#{end})
+		</if>
+		and m.id not in (select mid from accountlog where date between
+		date_add(#{start}, interval - day(#{start}) + 1 day) and
+		last_day(#{start}))
+		<if test="type==1">
+			order by id,date
+		</if>
+		<if test="type==2">
+			order by day(tday),id
+		</if>
+	</select>
+	<delete id="deleteAcountLogById">
+		Delete from accountlog where id=#{id}
+	</delete>
+	<resultMap id="memAmount" type="Map">
+		<result property="id" column="id" />
+		<result property="name" column="name" />
+		<result property="uname" column="uname" />
+		<result property="tday" column="tday" />
+		<result property="date" column="date" />
+	</resultMap>
+	<resultMap id="amountInfo" type="Map">
+		<result property="id" column="id" />
+		<result property="amount" column="amount" javaType="float" />
+		<result property="name" column="name" />
+	</resultMap>
+	<select id="checkFlag" parameterType="entity.AccountLog"
+		resultType="int">
+		SELECT count(*) FROM accountlog WHERE mid = #{member.id}
+		and flag = 0
+	</select>
+	<select id="getAccountLogByFlag" resultMap="accountLog">
+		SELECT
+		id,mid,amount,date,flag,fileflag,upflag,type from accountlog where flag = 0
+		group by mid having Min(date)
+	</select>
+	<select id="getAccountLogLastById" parameterType="int"
+		resultMap="accountLog">
+		SELECT * FROM accountlog WHERE mid = #{mid} ORDER BY date
+		DESC LIMIT 1
+	</select>
+	<!--getAccountLogAllByMidAndFlag这个查询中 Member中的alog被用来当AccountLog中的flag -->
+	<select id="getAccountLogAllByMidAndFlag" parameterType="entity.Member"
+		resultMap="accountLog">
+		select * from accountlog where mid=#{id}
+		<if test="alog==0">
+			and flag=0
+		</if>
+		<if test="alog==1">
+			and flag=1
+		</if>
+		<if test="alog==10">
+		</if>
+		order by date
+	</select>
+	<update id="updateAccountLog" parameterType="entity.AccountLog">
+		update accountlog set
+		amount=#{amount}, date=#{date}, flag=#{flag}, upflag=#{upflag}, photo=#{photo},
+		fileflag=#{fileflag},type=#{type} where id=#{id}
+	</update>
+	<select id="getAccountLogByMid" parameterType="int" resultMap="accountLog">
+		select * from accountlog 
+		where mid=#{mid}
+		order by date
+	</select>
+	<delete id="deleteAcountLogByMid">
+		Delete from accountlog where mid=#{mid}
+	</delete>
+	<select id="getAccountLogByMidAndFlagLast" parameterType="int" resultType="entity.AccountLog">
+		select * from accountlog where mid=#{mid} and flag = 0 order by date desc limit 1
+	</select>
+	
+	<select id="getAccountLogLast" parameterType="int" resultMap="accountLog1">
+	SELECT
+	log.id id,
+	log.amount AS payAmount,
+	log.date,
+	log.rid,
+	mb.id AS memberId,
+	mb. NAME AS memberName,
+	mb.mobile,
+	mb.sex,
+	mb.school,
+	ur.id AS userId,
+	ur.name AS userName,
+	am.id adminId,
+	am.realname adminRealName
+	FROM
+	member mb
+	LEFT JOIN accountlog log ON log.mid = mb.id
+	LEFT JOIN user ur   ON mb.uid = ur.id 
+	LEFT JOIN admin am on log.rid=am.id
+	WHERE
+	log.flag = 1 
+	ORDER BY
+	log.date desc
+	</select>
+	<resultMap type="entity.AccountLog" id="accountLog1">
+		<id column="id" property="id" />
+			<result column="payAmount" property="amount" />
+			<result column="date" property="date" />
+			<result column="rid" property="rid" />
+		<collection property="member" ofType="entity.Member">
+			<id column="memberId" property="id"/>
+			<result column="memberName" property="name"/>
+			<result column="mobile" property="mobile"/>
+			<result column="sex" property="sex"/>
+			<result column="school" property="school"/>	
+		</collection>
+		<collection property="user" ofType="entity.User">
+			<id column="userId" property="id"/>
+			<result column="userName" property="name"/>
+		</collection>
+		<collection property="admin" ofType="entity.Admin">
+			<id column="adminId" property="id"/>
+			<result column="adminRealName" property="realname"/>
+		</collection>
+	</resultMap>
+	<resultMap type="entity.AccountLog" id="accountLog">
+		<id column="id" property="id" />
+		<result column="amount" property="amount" />
+		<result column="date" property="date" />
+		<result column="flag" property="flag" />
+		<result column="fileflag" property="fileflag" />
+		<result column="upflag" property="upflag" />
+		<result column="type" property="type" />
+		<collection property="member" ofType="entity.Member">
+			<id column="mid" property="id" />
+		</collection>
+	</resultMap>
+</mapper>

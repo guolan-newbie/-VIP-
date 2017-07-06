@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="mapper.VisitMapper">	
+<insert id="addvisit" parameterType="entity.Visitor"  keyProperty="id" useGeneratedKeys="true">
+	insert into visitor(meid,identityType,VisitTime,LeftTime,ip,agent) values (#{meid},#{identityType},#{VisitTime},#{LeftTime},#{ip},#{agent});
+</insert>
+<update id="update" parameterType="entity.Visitor">update visitor set LeftTime=#{LeftTime} where id=#{id}</update> 
+<update id="updateAll" >update visitor set LeftTime=now() where LeftTime is null</update> 
+<insert id="addhistory" parameterType="entity.Visitor"  keyProperty="id" useGeneratedKeys="true">
+	insert into history(vid,VisitTime,Url,agent) values (#{visitor.id},#{VisitTime},#{Url},#{agent});
+</insert>
+<select id="getAll" parameterType="entity.Visitor" resultMap="userinfo">
+	select 
+			v.id				id,
+			v.visitTime			visitTime,
+			v.leftTime			leftTime,
+			v.ip             	ip,
+			v.comfrom         	comfrom,
+			v.agent			    agent,
+			u.id              	uid,
+			u.name 				name,
+			m.id				mid,
+			m.name 				realName
+	from
+		 	visitor v ,member m,user u
+	where 
+			u.id = v.uid and  u.id=m.uid
+</select>
+<select id="getOne" parameterType="entity.Visitor" resultType="entity.Visitor">
+	select 
+			*
+	from
+		 	visitor v 
+	where 
+			meid=#{meid} and identityType=#{identityType} and VisitTime=#{VisitTime}
+</select>
+<select id="getVisitorByPage" parameterType="dto.VisitorDTO" resultMap="userinfo">
+	select 
+			v.id				id,
+			v.meid				meid,
+			v.identityType		videntityType,
+			v.visitTime			visitTime,
+			v.leftTime			leftTime,
+			v.ip             	ip,
+			v.agent			    agent,
+			vme.id				vmeId,
+			vme.identityType	vmeidentityType,
+			vme.name 			vmeName
+	from
+		 	visitor v ,`v_mem&amp;exp` vme
+	where 
+			v.meid = vme.id and  v.identityType=vme.identityType
+	order by visitTime DESC
+</select>
+<select id="get" parameterType="entity.History" resultType="entity.History">
+		select * from history where vid=#{vid} 
+</select>
+<resultMap type="entity.Visitor" id="userinfo">
+		<id column="id" property="id"/>
+		<result column="visitTime" property="visitTime"/>
+		<result column="leftTime" property="leftTime"/>
+		<result column="ip" property="ip"/>
+		<result column="agent" property="agent"/>
+		<collection property="memAndExp" ofType="entity.MemAndExp">
+			<id column="vmeId" property="id"/>
+			<result column="vmeName" property="name"/>
+		</collection>
+	</resultMap>
+</mapper>

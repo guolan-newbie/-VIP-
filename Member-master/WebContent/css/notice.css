@@ -1,0 +1,57 @@
+.mywridiv{
+	background-color: #FFFFFF;
+	width: 700px;
+	height: 50px;
+	border-radius: 5px;
+	margin-left: 20px;
+}
+.mywridivspan{
+	font-weight: 600;
+	position: relative;
+	top: 16px;
+	left: 300px;
+}
+#contentdiv{
+	width:700px; 
+	background-color:#FFFFFF;
+	margin-left:20px;
+}
+.allfontspan{
+	font-weight: 600;
+	position: relative;
+	top: 19px;
+	left: 50px;
+}
+.allfontspan2{
+	position: relative; 
+	top: 19px;
+	margin-right: 50px;
+	float: right;
+}
+.condiv{
+	position: relative;
+	left: 50px;
+	width: 585px;
+}
+.condivtil{
+	font-size: 14px;
+	font-weight: 400;
+	color:#828282;
+	font-family: Microsoft YaHei, Times, serif;
+}
+.condivicon{
+	float: right; 
+	margin-right: 10px;
+}
+.icon1iner{
+	position: relative;
+	top: -2px;
+	color:#828282;
+	font-family: Microsoft YaHei, sans-serif;
+}
+.title{
+	font-size:18px;
+	font-weight: 400;
+	color:#424242;
+	font-family: Microsoft YaHei, sans-serif;
+}

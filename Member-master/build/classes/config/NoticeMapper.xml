@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="mapper.NoticeMapper">
+	<update id="update" parameterType="entity.Notice">
+		update notice set aid=#{admin.id},title=#{title},content=#{content} where id=#{id}
+	</update>		
+	<insert id="add" parameterType="entity.Notice"  useGeneratedKeys="true" keyProperty="id">
+		insert into notice(aid,title,content,publishtime,createtime,status,enable,settop) 
+		values 
+		(#{admin.id},#{title},#{content},#{publishtime},#{createtime},#{status},#{enable},#{settop})
+	</insert>
+	<select id="getall" resultType="entity.Notice" parameterType="map">
+		select * from notice where createtime between #{front} and #{after}
+		<if test="type!=null">
+			and type = #{type}
+		</if>
+		<if test="title!=null">
+			and title like CONCAT('%', #{title}, '%')
+		</if>
+		order by createtime desc
+	</select>
+	
+	<select id="getNoticeByPage" resultType="entity.Notice" parameterType="dto.NoticeDTO">
+		select * from notice where createtime between #{front} and #{after}
+		<if test="type!=0">
+			and type = #{type}
+		</if>
+		<if test="title!=null">
+			and title like CONCAT('%', #{title}, '%')
+		</if>
+		order by createtime desc
+	</select>
+	<select id="getLastest" parameterType="entity.Notice" resultType="map">
+		select notice.id id,realname,content,title,DATE_FORMAT(publishtime,'%Y-%m-%d %H:%i:%k') publishtime,aid from notice left join admin on notice.aid=admin.id where status=1 order by publishtime desc limit 1
+	</select>
+	<select id="getNotices" parameterType="entity.Notice" resultType="map">
+		select notice.id id,realname,content,title,DATE_FORMAT(publishtime,'%Y-%m-%d %H:%i:%k') publishtime,aid from notice left join admin on notice.aid=admin.id where status=1 order by publishtime desc
+	</select>
+	<select id="getnoticeTime" resultType="String">
+		select DATE_FORMAT(noticeTime,'%Y-%m-%d %H:%i:%k') "noticeTime" from user where id=#{uid} limit 1
+	</select>
+	<select id="getnoticeExperienceTime" resultType="String">
+		select DATE_FORMAT(noticeTime,'%Y-%m-%d %H:%i:%k') "noticeTime" from experience where id=#{eid} limit 1
+	</select>
+	<select id="get" parameterType="entity.Notice" resultType="entity.Notice">
+		select * from notice where id=#{id};
+	</select>
+	<update id="updatenoticeTime" parameterType="map">
+		update user set noticeTime=#{date} where id=#{uid};
+	</update>
+	<update id="updatenoticeExperienceTime" parameterType="map">
+		update experience set noticeTime=#{dateEx} where id=#{eid};
+	</update>
+	<update id="updatePublish" parameterType="entity.Notice">
+		update notice set publishtime=#{publishtime},status=#{status} where id=#{id};
+	</update>
+	<update id="updateSettop" parameterType="entity.Notice">
+		update notice set settop=#{settop} where id=#{id};
+	</update>
+	<delete id="delNotice" parameterType="int">
+		delete from notice where id=#{id};
+	</delete>
+	<!-- 分页查询历史记录 -->
+	<select id="getAllByPage" parameterType="dto.NoticeDTO" resultType="map">
+	    select 
+	    	notice.id id,
+	    	realname,
+	    	content,
+	    	title,
+	    	DATE_FORMAT(publishtime,'%Y-%m-%d %H:%i:%k') publishtime,
+	    	aid 
+	    from 
+	    	notice 
+	    left join 
+	    	admin 
+	    on 
+	    	notice.aid=admin.id 
+	    where 
+	    	status=1
+		order by 
+			publishtime desc
+	</select>
+	
+	
+</mapper>

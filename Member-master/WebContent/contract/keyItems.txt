@@ -1,0 +1,33 @@
+﻿
+*协议文件变量名称以及对应位置*
+========================================================================
+合同编号：		  No
+甲方(学员)：	  member.Name
+姓名：		  member.Name		
+身份证号码：	  member.userinfo.idNo
+常用联系电话：        member.phone
+常用联系QQ：	  member.userinfo.qqNo
+学校名称：	      member.school
+具体毕业时间：        member.graduateDate
+支付宝账号：	  member.userinfo.payAccount
+家庭联系人姓名：     member.userinfo.contactName
+家庭联系人电话：     member.userinfo.contactMobile
+与家庭联系人关系： member.userinfo.relation
+本人收件地址：	  member.userinfo.address
+甲方(签字)：           member.Name
+签字日期：               signDate
+
+乙方(签字): 张中强
+签字日期：              signDate
+
+费用信息
+总费用：                  Amount
+首次交费：		 FirstAmount
+每月交费	     MonthlyAmountp
+*网站使用了PDF.js插件进行PDF在线预览，传参格式如下，可通过修改pdf文件*
+*名预览不同的pdf文件*
+========================================================================
+pdf-url
+${pageContext.request.contextPath }/pdf.js-master/web/viewer.html?file=test.pdf
+
+========================================================================

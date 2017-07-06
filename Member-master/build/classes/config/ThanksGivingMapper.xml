@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="mapper.ThanksGivingMapper">
+	<insert id="addInfo" parameterType="entity.ThanksGiving">
+		insert into thanksgiving(gname,mgid,rname,mrid,money,time) values(#{gname},#{mgid},#{rname},#{mrid},#{money},#{time})
+	</insert>
+	<select id="getAllInfo"  resultType="entity.ThanksGiving">
+		select 
+			id,
+			gname,
+			mgid,
+			rname,
+			mrid,
+			money,
+			DATE_FORMAT(time,'%Y/%c/%d %H:%i:%S') time
+		from thanksgiving ORDER BY time DESC
+	</select>
+	<select id="getAllByPage" parameterType="dto.ThanksGivingDTO" resultType="entity.ThanksGiving">
+		select 
+			id,
+			gname,
+			mgid,
+			rname,
+			mrid,
+			money,
+			DATE_FORMAT(time,'%Y/%c/%d %H:%i:%S') time
+		from thanksgiving ORDER BY time DESC
+	</select>
+	<select id="getInfoByMemberId" parameterType="int" resultType="entity.ThanksGiving">
+		select 
+			id,
+			gname,
+			mgid,
+			rname,
+			mrid,
+			money,
+			DATE_FORMAT(time,'%Y/%c/%d %H:%i:%S') time
+		from thanksgiving where mgid=#{id} or mrid=#{id} ORDER BY time DESC
+	</select>
+</mapper>

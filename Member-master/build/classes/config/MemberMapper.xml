@@ -1,0 +1,664 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="mapper.MemberMapper">
+	 <update id="updateRest" parameterType="entity.Member">
+  		update member set restInterest = #{restInterest} where id = #{id}
+ 	</update>
+	<select id="getByUid" parameterType="int" resultType="entity.Member">
+		select * from member where uid=#{uid}
+	</select>
+	
+	<!--
+	 * 修改：添加出生地seat_provid
+	 * 作者：王德斌
+	 * 日期：2016-10-13
+	 -->
+	<select id="getMemById" parameterType="int" resultMap="mobileResult">
+			SELECT
+				a.id aaid,
+				a.realname realname,
+				atable.id id,
+				uid,
+				atable.`name` `name`,
+				sex,
+				uuid,
+				school,
+				company,
+				mobile,
+				student,
+				graduateDate,
+				atable.time time,
+				abnormal,
+				flag,
+				alog,
+				restAmount,
+				restInterest,
+				fee,
+				provid,
+				seat_provid,
+				summaryflag,
+				atable.uname uname,
+				aid aid,
+				periodStatus
+			FROM(
+			select  
+									m.id id,
+									uid,
+									m.`name` `name`,
+									sex,
+									school,
+									company,
+									mobile,
+									student,
+									graduateDate,
+									m.time time,
+									abnormal,
+									flag,
+									alog,
+									restAmount,
+									restInterest,
+									fee,
+									provid,
+									seat_provid,
+									summaryflag,
+									u.`id` uuid,
+									u.`name` uname,
+									m.aid aid,
+									periodStatus
+					from member m
+					LEFT JOIN
+						`user` u
+					ON
+						u.id=m.uid
+					where m.id=#{member.id}) atable
+			LEFT JOIN admin a
+			ON atable.aid=a.id
+		
+		</select>
+	<select id="getMemByName" parameterType="String" resultType="entity.Member">
+		select * from member where name=#{name}
+	</select>
+	
+	<!--
+	 * 修改：添加出生地seat_provid
+	 * 作者：王德斌
+	 * 日期：2016-10-13
+	 -->
+	<select id="getMemByMobile" parameterType="String" resultMap="mobileResult">
+		select  
+						m.id id,
+						uid,
+						m.`name` `name`,
+						sex,
+						school,
+						company,
+						mobile,
+						student,
+						graduateDate,
+						m.time time,
+						abnormal,
+						flag,
+						alog,
+						restAmount,
+						restInterest,
+						fee,
+						provid,
+						seat_provid,
+						u.`name` uname
+		from member m
+		LEFT JOIN
+			`user` u
+		ON
+			u.id=m.uid
+		where mobile=#{mobile}
+	</select>
+	
+	<!--
+	 * 修改：添加出生地seat_provid
+	 * 作者：王德斌
+	 * 日期：2016-10-13
+	 -->
+	<insert id="update" parameterType="entity.Member"   useGeneratedKeys="true" keyProperty="id">
+	<if test="id == 0"> 
+		insert into member 
+		(	
+			uid,
+			name,
+			sex,
+			school,
+			company,
+			mobile,
+			student,
+			graduateDate,
+			time,
+			flag,
+			alog,
+			fee,
+			provid,
+			seat_provid,
+			periodStatus
+		)
+		values
+		(
+			#{user.id},
+			#{name},
+			#{sex},
+			#{school},
+			#{company},
+			#{mobile},
+			#{student},
+			#{graduateDate},
+			#{time},
+			#{flag},
+			#{alog},
+			#{fee},
+			#{provid},
+			#{seat_provid},
+			#{periodStatus}
+		)
+	</if>	
+	<if test="id > 0"> 
+		update member set
+			uid=#{user.id},
+			name=#{name},
+			sex=#{sex},
+			school=#{school},
+			company=#{company},
+			mobile=#{mobile},
+			student=#{student},
+			graduateDate=#{graduateDate},
+			abnormal=#{abnormal},
+			flag=#{flag},
+			alog=#{alog},
+			restAmount=#{restAmount},
+			restInterest=#{restInterest},
+			fee=#{fee},
+			provid=#{provid},
+			seat_provid=#{seat_provid},
+			aid=#{aid},
+			summaryflag=#{summaryflag},
+			periodStatus=#{periodStatus}
+		where id=#{id}
+	</if>
+	</insert>
+	
+	<!--
+	 * 修改：添加出生地seat_provid
+	 * 作者：王德斌
+	 * 日期：2016-10-13
+	 -->
+	<insert id="add" parameterType="entity.Member"   useGeneratedKeys="true" keyProperty="id">
+	insert into member 
+		(	
+			uid,
+			name,
+			sex,
+			school,
+			company,
+			mobile,
+			student,
+			graduateDate,
+			time,			
+			provid,
+			seat_provid,
+			flag,
+			aid,
+			eid,
+			summaryflag
+		)
+		values
+		(
+			#{uid},
+			#{name},
+			#{sex},
+			#{school},
+			#{company},
+			#{mobile},
+			#{student},
+			#{graduateDate},
+			#{time},
+			#{provid},
+			#{seat_provid},
+			#{flag},
+			#{aid},
+			#{eid},
+			#{summaryflag}
+
+		)
+	</insert>
+	<select id="getAll" resultType="entity.Member">
+		select * from member
+	</select>
+	<select id="getSumAll" parameterType="entity.Summary" resultMap="suminfo">
+		select
+			s.id id,
+			s.title title,
+			s.content content,
+			DATE_FORMAT(s.time,'%Y/%c/%d %H:%i:%S') time,
+			m.id mid,
+			m.name name
+		from
+			summary s,
+			member m
+		where 
+			m.id=s.mid and s.mid=#{member.id} and s.pid=0 ORDER BY id DESC;
+	</select>
+	<resultMap type="entity.Summary" id="suminfo">
+		<id property="id" column="id"/>
+		<result property="title" column="title"/>
+		<result property="content" column="content"/>
+		<result property="time" column="time"/>
+		<collection property="member" ofType="entity.Member">
+			<id property="id" column="mid" />
+			<result property="name" column="name" />
+		</collection>
+	</resultMap>
+	<select id="getProvinces" resultType="entity.Province">
+		select * from province
+	</select>
+	<select id="getCount" resultType="int">
+		select count(*) from member
+	</select>
+	<select id="getSex" resultMap="result">
+		select count(case when sex='男' then sex end) first,count(case when sex='女' then sex end) second from member
+	</select>
+	<select id="getStudent" resultMap="result">
+		select count(case when student='1' then student end) first,
+			   count(case when student='0' then student end) second 
+		from member
+	</select>
+	<select id="getAge" resultMap="result">
+	    select count(case when c.age&lt;'20' then age end) first,
+	           count(case when c.age&lt;'26' and c.age&gt;'19' then age end) second,
+	           count(case when c.age&lt;'31' and c.age&gt;'25' then age end) third,
+	    	   count(case when c.age&gt;'30' then age end) fourth  
+	    from 
+	           (select year(SYSDATE())-SUBSTR(userinfo.idNo ,7,4) as age from userinfo) c
+	</select>
+	<select id="getProvince" resultType="entity.Province">
+		select province.name as name, count(member.id) as id
+		from member right join province on member.provid = province.id
+		group by province.name order by id desc;
+	</select>
+	<select id="getBornProvince" resultType="entity.Province">
+		select province.name as name, count(member.id) as id
+		from member right join province on member.seat_provid = province.id
+		group by province.name order by id desc;
+	</select>
+	<resultMap type="entity.ResultType" id="result">
+		<result column="first" property="first"/>
+		<result column="second" property="second"/>
+		<result column="third" property="third"/>
+		<result column="fourth" property="fourth"/>
+	</resultMap>
+	
+		<!--
+		 * 修改：添加出生地seat_provid
+		 * 作者：王德斌
+		 * 日期：2016-10-13
+		 -->
+		<resultMap type="entity.Member" id="mobileResult">
+		<id property="id" column="id"/>
+		<result property="uid" column="uid"/>
+		<result property="name" column="name"/>
+		<result property="sex" column="sex"/>
+		<result property="school" column="school"/>
+		<result property="company" column="company"/>
+		<result property="mobile" column="mobile"/>
+		<result property="student" column="student"/>
+		<result property="graduateDate" column="graduateDate"/>
+		<result property="time" column="time"/>
+		<result property="abnormal" column="abnormal"/>
+		<result property="flag" column="flag"/>
+		<result property="alog" column="alog"/>
+		<result property="restAmount" column="restAmount"/>
+		<result property="restInterest" column="restInterest"/>
+		<result property="fee" column="fee"/>
+		<result property="provid" column="provid"/>
+		<result property="seat_provid" column="seat_provid"/>
+		<result property="aid" column="aid"/>
+		<result property="summaryflag" column="summaryflag"/>
+		<result property="periodStatus" column="periodStatus"/>
+		<association property="user" javaType="entity.User">
+			<id property="id" column="uuid"/>
+			<result property="name" column="uname"/>
+		</association>
+		<association property="admin" javaType="entity.Admin">
+			<id property="id" column="aaid"/>
+			<result property="realname" column="realname"/>
+		</association>
+		</resultMap>
+		
+	<!--查询同城Member-->
+	<select id="samePro" parameterType="int" resultMap="userProv">
+		select 
+			u.id			id,
+				u.name 			name,
+				u.time			registerTime,
+				
+				m.id			mid,
+				m.name 			realName,
+				m.sex  			sex,
+				m.school		school,
+				m.company		company,
+				m.mobile		mobile,
+				m.student		student,
+				m.graduateDate	graduateDate,
+				m.time			joinTime,
+				m.abnormal		abnormal,
+				m.flag			flag,
+				m.alog			alog,
+				m.restAmount	restAmount,
+				m.restInterest	restInterest,
+				m.fee			fee,
+				m.provid        provid,
+				
+				p.id            pid,
+				p.photo			photo,
+				p.cover			cover,
+				p.title         title,
+				p.url	        url
+		 from user u ,member m ,picture p
+		where u.id = m.uid and m.provid=#{provid} and u.id=p.uid and p.title = "封面"
+	</select>
+	
+	<!--
+	 * 修改：添加出生地seat_provid
+	 * 作者：王德斌
+	 * 日期：2016-10-13
+	 -->
+	<resultMap type="entity.User" id="userProv">
+		<id column="id" property="id"/>
+		<result column="name" property="name"/>
+		<result column="registerTime" property="time"/>
+		<collection property="member" ofType="entity.Member">
+			<id column="mid" property="id"/>
+			<result column="realName" property="name"/>
+			<result column="sex" property="sex"/>
+			<result column="school" property="school"/>
+			<result column="company" property="company"/>
+			<result column="mobile" property="mobile"/>
+			<result column="student" property="student"/>
+			<result column="graduateDate" property="graduateDate"/>
+			<result column="joinTime" property="time"/>
+			<result column="abnormal" property="abnormal"/>
+			<result column="flag" property="flag"/>
+			<result column="alog" property="alog"/>
+			<result column="restAmount" property="restAmount"/>
+			<result column="restInterest" property="restInterest"/>
+			<result column="fee" property="fee"/>
+			<result column="provid" property="provid" />
+			<result column="seat_provid" property="seat_provid" />
+		</collection>
+		<collection property="picture" ofType="entity.Picture">
+			<id column="pid" property="id"/>
+			<result column="photo" property="photo"/>
+			<result column="cover" property="cover"/>
+			<result column="title" property="title"/>
+			<result column="url" property="url"/>
+		</collection>
+	</resultMap>
+	<!--获取Member详细信息-->
+	<select id="getMemDetails" parameterType="int" resultMap="userinfo">
+		select 
+			u.id			id,
+				u.name 			name,
+				u.time			registerTime,
+				m.id			mid,
+				m.name 			realName,
+				m.sex  			sex,
+				m.school		school,
+				m.company		company,
+				m.mobile		mobile,
+				m.student		student,
+				m.graduateDate	graduateDate,
+				m.time			joinTime,
+				m.abnormal		abnormal,
+				m.flag			flag,
+				m.alog			alog,
+				m.restAmount	restAmount,
+				m.restInterest	restInterest,
+				m.fee			fee,
+				m.provid        provid,
+				i.id            iid,
+				i.idNo          idNo,
+				i.qqNo          qqNo,
+				i.payAccount    payAccount,
+				i.contactName   contactName,
+				i.relation      relation,
+				i.contactMobile contactMobile,
+				i.address       address
+		 from user u ,member m,userinfo i
+		where u.id = m.uid and m.uid=#{id} and u.id=i.uid
+	</select>
+	
+	<!--
+	 * 修改：添加出生地seat_provid
+	 * 作者：王德斌
+	 * 日期：2016-10-13
+	 -->
+	<resultMap type="entity.User" id="userinfo">
+		<id column="id" property="id"/>
+		<result column="name" property="name"/>
+		<result column="registerTime" property="time"/>
+		<collection property="member" ofType="entity.Member">
+			<id column="mid" property="id"/>
+			<result column="realName" property="name"/>
+			<result column="sex" property="sex"/>
+			<result column="school" property="school"/>
+			<result column="company" property="company"/>
+			<result column="mobile" property="mobile"/>
+			<result column="student" property="student"/>
+			<result column="graduateDate" property="graduateDate"/>
+			<result column="joinTime" property="time"/>
+			<result column="abnormal" property="abnormal"/>
+			<result column="flag" property="flag"/>
+			<result column="alog" property="alog"/>
+			<result column="restAmount" property="restAmount"/>
+			<result column="restInterest" property="restInterest"/>
+			<result column="fee" property="fee"/>
+			<result column="provid" property="provid" />
+			<result column="seat_provid" property="seat_provid" />
+		</collection>
+		<collection property="userInfo" ofType="entity.UserInfo">
+			<id column="iid" property="id"/>
+			<result column="idNo" property="idNo"/>
+			<result column="qqNo" property="qqNo"/>
+			<result column="payAccount" property="payAccount"/>
+			<result column="contactName" property="contactName"/>
+			<result column="contactMobile" property="contactMobile"/>
+			<result column="relation" property="relation"/>
+			<result column="address" property="address"/>
+		</collection>
+	</resultMap>
+	<select id="getProvByProvId" parameterType="int" resultType="entity.Province">
+		select * from province where id = #{provid}
+	</select>
+		<!--查询校友Member-->
+		<select id="sameScho" parameterType="String" resultMap="userScho">
+		select 
+			u.id			id,
+				u.name 			name,
+				u.time			registerTime,
+				
+				m.id			mid,
+				m.name 			realName,
+				m.sex  			sex,
+				m.school		school,
+				m.company		company,
+				m.mobile		mobile,
+				m.student		student,
+				m.graduateDate	graduateDate,
+				m.time			joinTime,
+				m.abnormal		abnormal,
+				m.flag			flag,
+				m.alog			alog,
+				m.restAmount	restAmount,
+				m.restInterest	restInterest,
+				m.fee			fee,
+				m.provid        provid,
+				
+				p.id            pid,
+				p.photo			photo,
+				p.cover			cover,
+				p.title         title,
+				p.url	        url
+		 from user u ,member m ,picture p
+		where u.id = m.uid and m.school=#{school} and u.id=p.uid and p.title = "封面"
+	</select>
+	
+	<!--
+	 * 修改：添加出生地seat_provid
+	 * 作者：王德斌
+	 * 日期：2016-10-13
+	 -->
+	<resultMap type="entity.User" id="userScho">
+		<id column="id" property="id"/>
+		<result column="name" property="name"/>
+		<result column="registerTime" property="time"/>
+		<collection property="member" ofType="entity.Member">
+			<id column="mid" property="id"/>
+			<result column="realName" property="name"/>
+			<result column="sex" property="sex"/>
+			<result column="school" property="school"/>
+			<result column="company" property="company"/>
+			<result column="mobile" property="mobile"/>
+			<result column="student" property="student"/>
+			<result column="graduateDate" property="graduateDate"/>
+			<result column="joinTime" property="time"/>
+			<result column="abnormal" property="abnormal"/>
+			<result column="flag" property="flag"/>
+			<result column="alog" property="alog"/>
+			<result column="restAmount" property="restAmount"/>
+			<result column="restInterest" property="restInterest"/>
+			<result column="fee" property="fee"/>
+			<result column="provid" property="provid" />
+			<result column="seat_provid" property="seat_provid" />
+		</collection>
+		<collection property="picture" ofType="entity.Picture">
+			<id column="pid" property="id"/>
+			<result column="photo" property="photo"/>
+			<result column="cover" property="cover"/>
+			<result column="title" property="title"/>
+			<result column="url" property="url"/>
+		</collection>
+	</resultMap>
+	
+	<!--查询同龄Member-->
+		<select id="sameAge" parameterType="String" resultMap="userage">
+			select 
+			u.id			id,
+				u.name 			name,
+				u.time			registerTime,
+				
+				m.id			mid,
+				m.name 			realName,
+				m.sex  			sex,
+				m.school		school,
+				m.company		company,
+				m.mobile		mobile,
+				m.student		student,
+				m.graduateDate	graduateDate,
+				m.time			joinTime,
+				m.abnormal		abnormal,
+				m.flag			flag,
+				m.alog			alog,
+				m.restAmount	restAmount,
+				m.restInterest	restInterest,
+				m.fee			fee,
+				m.provid        provid,
+				
+				p.id            pid,
+				p.photo			photo,
+				p.cover			cover,
+				p.title         title,
+				p.url	        url,
+				
+				ui.id            uiid,
+				ui.idNo          idNo,
+				ui.qqNo          qqNo,
+				ui.payAccount    payAccount,
+				ui.contactName   contactName,
+				ui.relation      relation,
+				ui.contactMobile contactMobile,
+				ui.address       address
+		 from user u ,member m ,picture p ,userinfo ui
+		where u.id = m.uid and u.id=p.uid and p.title = "封面" and u.id = ui.uid and SUBSTRING(idNo ,7,4)=#{idNo)}
+		</select>
+		
+		<!--
+		 * 修改：添加出生地seat_provid
+		 * 作者：王德斌
+		 * 日期：2016-10-13
+		 -->
+		<resultMap type="entity.User" id="userage">
+		<id column="id" property="id"/>
+		<result column="name" property="name"/>
+		<result column="registerTime" property="time"/>
+		<collection property="member" ofType="entity.Member">
+			<id column="mid" property="id"/>
+			<result column="realName" property="name"/>
+			<result column="sex" property="sex"/>
+			<result column="school" property="school"/>
+			<result column="company" property="company"/>
+			<result column="mobile" property="mobile"/>
+			<result column="student" property="student"/>
+			<result column="graduateDate" property="graduateDate"/>
+			<result column="joinTime" property="time"/>
+			<result column="abnormal" property="abnormal"/>
+			<result column="flag" property="flag"/>
+			<result column="alog" property="alog"/>
+			<result column="restAmount" property="restAmount"/>
+			<result column="restInterest" property="restInterest"/>
+			<result column="fee" property="fee"/>
+			<result column="provid" property="provid" />
+			<result column="seat_provid" property="seat_provid" />
+		</collection>
+		<collection property="picture" ofType="entity.Picture">
+			<id column="pid" property="id"/>
+			<result column="photo" property="photo"/>
+			<result column="cover" property="cover"/>
+			<result column="title" property="title"/>
+			<result column="url" property="url"/>
+		</collection>
+		<collection property="userInfo" ofType="entity.UserInfo">
+			<id column="uiid" property="id"/>
+			<result column="idNo" property="idNo"/>
+			<result column="qqNo" property="qqNo"/>
+			<result column="payAccount" property="payAccount"/>
+			<result column="contactName" property="contactName"/>
+			<result column="contactMobile" property="contactMobile"/>
+			<result column="relation" property="relation"/>
+			<result column="address" property="address"/>
+		</collection>
+	</resultMap>
+	<!--获取封面图片-->
+	<select id="getCover" parameterType="int" resultType="entity.Picture">
+		select * from picture where cover=1 and uid=#{uid} order by time desc limit 0,1;
+	</select>
+	<!--获取会员编号Uname  -->
+	<select id="getUnameByMid" parameterType="int" resultType="String">
+		select name from user where id=#{mid};
+	</select>
+		<select id="getAllSchoolByPage" parameterType="dto.SchoolDTO" resultType="String">
+		SELECT DISTINCT m.school from member m WHERE m.school !='' and m.school is not null
+	</select>
+			<select id="getSchoolMemberCount" parameterType="String" resultType="int">
+		SELECT COUNT(*) from member WHERE school=#{school}
+	</select>
+	<select id="getMemOfFee" resultType="entity.Member">
+		select * from member where fee=0 and flag=1
+	</select>
+	<select id="getMemberCost" resultType="dto.CostDTO">
+		select * from v_member_cost where unpaidAmount > 0
+		<if test="type==1">
+			and finalPaymentDate &gt; date_sub(curdate(),interval 2 month) and finalPaymentDate &lt;= date_sub(curdate(),interval 1 month)
+		</if>
+		<if test="type==2">
+			and finalPaymentDate &lt;= date_sub(curdate(),interval 2 month)
+		</if>
+		order by no
+	</select>
+</mapper>

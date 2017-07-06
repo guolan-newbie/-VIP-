@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="mapper.OnDutyLogMapper">	
+	<insert id="add" parameterType="entity.OnDutyLog" useGeneratedKeys="true" keyProperty="id">
+		insert into ondutylog(oid,mid,cid,beHelpedName,beHelpedQQ,beHelpedInfo,qustionDescription,solutionReport,flag,checkTime,submitTime) values (#{oid},#{mid},#{cid},#{beHelpedName},#{beHelpedQQ},#{beHelpedInfo},#{qustionDescription},#{solutionReport},#{flag},#{checkTime},#{submitTime})
+	</insert>
+	<select id="getApply" parameterType="int" resultType="entity.OnDuty">
+		SELECT * from onduty where mid=#{mid} AND flag=1
+	</select>
+	<select id="getLogs" resultMap="logs">
+		SELECT 
+			o.id ooid,oid,mid,cid,beHelpedName,beHelpedQQ,beHelpedInfo,qustionDescription,solutionReport,o.flag oflag,checkTime,submitTime,m.id mmid,m.`name` manme
+		FROM
+			ondutylog o,member m
+		WHERE
+			m.id=o.mid
+	</select>
+	<select id="getLogsByPage" parameterType="dto.OnDutyLogDTO" resultMap="logs">
+		SELECT 
+			o.id ooid,oid,mid,cid,beHelpedName,beHelpedQQ,beHelpedInfo,qustionDescription,solutionReport,o.flag oflag,checkTime,submitTime,m.id mmid,m.`name` manme
+		FROM
+			ondutylog o,member m
+		WHERE
+			m.id=o.mid and o.flag=0
+	</select>
+	<select id="getSRById" parameterType="int" resultType="String">
+		SELECT solutionReport from ondutylog WHERE id=#{id}
+	</select>
+	<update id="checkLogById" parameterType="entity.OnDutyLog">
+		UPDATE ondutylog SET flag=1,checkTime=#{checkTime} WHERE id=#{id}
+	</update>
+	<select id="getLogsForModifyByPage" parameterType="dto.OnDutyLogDTO" resultMap="logsformodify">
+		SELECT 
+			ol.id olid,oid,ol.mid olmid,cid,beHelpedName,beHelpedQQ,beHelpedInfo,qustionDescription,solutionReport,ol.flag olflag,checkTime,submitTime,o.id ooid,`start`
+		FROM
+			ondutylog ol,onduty o
+		WHERE
+		oid=o.id and ol.mid=#{id}
+		order by `start` DESC
+
+	</select>
+		<select id="getLogById" parameterType="int" resultType="entity.OnDutyLog">
+		SELECT 
+			id,oid,mid,cid,beHelpedName,beHelpedQQ,beHelpedInfo,qustionDescription,solutionReport,flag,checkTime,submitTime
+		FROM
+			ondutylog 
+		WHERE
+		id=#{id}
+	</select>
+	<select id="getLogsByOidAndMid" parameterType="entity.OnDutyLog" resultMap="logsforshow">
+		SELECT 
+			ol.id olid,oid,ol.mid olmid,cid,beHelpedName,beHelpedQQ,beHelpedInfo,qustionDescription,solutionReport,ol.flag olflag,checkTime,submitTime,o.id ooid,`start`,`end`
+		FROM
+			ondutylog ol,onduty o
+		WHERE
+		oid=o.id and ol.mid=#{mid} and oid=#{oid}
+		order by submitTime DESC
+
+	</select>
+	<select id="getLogsByOid" parameterType="entity.OnDutyLog" resultMap="logsforshow">
+		SELECT 
+			ol.id olid,oid,ol.mid olmid,cid,beHelpedName,beHelpedQQ,beHelpedInfo,qustionDescription,solutionReport,ol.flag olflag,checkTime,submitTime,o.id ooid,`start`,`end`
+		FROM
+			ondutylog ol,onduty o
+		WHERE
+		oid=o.id and oid=#{oid}
+		order by submitTime DESC
+
+	</select>
+	<update id="modify" parameterType="entity.OnDutyLog">
+		UPDATE 
+			ondutylog 
+		SET 
+			oid=#{oid},beHelpedName=#{beHelpedName},beHelpedQQ=#{beHelpedName},beHelpedInfo=#{beHelpedInfo},qustionDescription=#{qustionDescription},solutionReport=#{solutionReport}
+		WHERE id=#{id}
+	</update>
+	<resultMap type="entity.OnDutyLog" id="logs">
+		<id column="ooid" property="id"/>
+		<result column="oid" property="oid"/>
+		<result column="mid" property="mid"/>
+		<result column="cid" property="cid"/>
+		<result column="beHelpedName" property="beHelpedName"/>
+		<result column="beHelpedQQ" property="beHelpedQQ"/>
+		<result column="beHelpedInfo" property="beHelpedInfo"/>
+		<result column="qustionDescription" property="qustionDescription"/>
+		<result column="solutionReport" property="solutionReport"/>
+		<result column="oflag" property="flag"/>
+		<result column="checkTime" property="checkTime"/>
+		<result column="submitTime" property="submitTime"/>
+		<association property="member" javaType="entity.Member">
+			<id column="mmid" property="id"/>
+			<result column="manme" property="name" />
+		</association>
+
+	</resultMap>
+	<resultMap type="entity.OnDutyLog" id="logsformodify">
+		<id column="olid" property="id"/>
+		<result column="oid" property="oid"/>
+		<result column="olmid" property="mid"/>
+		<result column="cid" property="cid"/>
+		<result column="beHelpedName" property="beHelpedName"/>
+		<result column="beHelpedQQ" property="beHelpedQQ"/>
+		<result column="beHelpedInfo" property="beHelpedInfo"/>
+		<result column="qustionDescription" property="qustionDescription"/>
+		<result column="solutionReport" property="solutionReport"/>
+		<result column="olflag" property="flag"/>
+		<result column="checkTime" property="checkTime"/>
+		<result column="submitTime" property="submitTime"/>
+		<association property="onDuty" javaType="entity.OnDuty">
+			<id column="ooid" property="id"/>
+			<result column="start" property="start" />
+		</association>
+	</resultMap>
+	<resultMap type="entity.OnDutyLog" id="logsforshow">
+		<id column="olid" property="id"/>
+		<result column="oid" property="oid"/>
+		<result column="olmid" property="mid"/>
+		<result column="cid" property="cid"/>
+		<result column="beHelpedName" property="beHelpedName"/>
+		<result column="beHelpedQQ" property="beHelpedQQ"/>
+		<result column="beHelpedInfo" property="beHelpedInfo"/>
+		<result column="qustionDescription" property="qustionDescription"/>
+		<result column="solutionReport" property="solutionReport"/>
+		<result column="olflag" property="flag"/>
+		<result column="checkTime" property="checkTime"/>
+		<result column="submitTime" property="submitTime"/>
+		<association property="onDuty" javaType="entity.OnDuty">
+			<id column="ooid" property="id"/>
+			<result column="start" property="start" />
+			<result column="end" property="end" />
+		</association>
+
+	</resultMap>
+</mapper>

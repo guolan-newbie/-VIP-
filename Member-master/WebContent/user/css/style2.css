@@ -1,0 +1,167 @@
+*, :before, :after {
+  box-sizing: border-box;
+  margin: 0;
+  transition: 0.4s;
+}
+
+body {
+  background: #616161 url(../images/register.jpg) center/cover no-repeat;
+  height: 150vh;
+  overflow: hidden;
+  color: #FFF;
+}
+
+.modal {
+  height: 400px;
+  width: 650px;
+  margin: auto;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  transition: .4s, box-shadow .3s .4s;
+}
+.modal.hidden {
+  box-shadow: none;
+  transition: .4s, box-shadow 0s;
+  opacity: 0;
+  visibility: hidden;
+}
+.modal.hidden .form {
+  top: 100%;
+}
+.modal.hidden .invite {
+  top: -100%;
+}
+.modal.hidden .invite  {
+  height: 0;
+  width: 0;
+  top: 0;
+  right: 0;
+}
+
+
+.form, .invite {
+
+  width: 50%;
+  height: 100%;
+  padding: 25px;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+input {
+  background: rgba(255, 255, 255, 0.75);
+  width: 100%;
+  padding: 8px;
+  margin: 15px 0;
+
+  border-radius: 3px;
+  outline: none;
+  color: #CCC;
+  font-size: 20px;
+  border:#000 solid 0.1px;
+}
+input:focus {
+	background-color: #CCC;
+}
+input:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0px 500px #7a7a7a inset;
+  -webkit-text-fill-color: #FFF;
+}
+
+label {
+  color: #666;
+}
+
+.register {
+  background: #999;;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 21px;
+  outline: none;
+  overflow: visible;
+  position: absolute;
+  bottom: 10px;
+  left: 30%;
+  color: #FFF;
+  font-size: 18px;
+  cursor: pointer;
+  transform: translateX(-50%);
+}
+.Reset{
+  background: #999;;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 21px;
+  outline: none;
+  overflow: visible;
+  position: absolute;
+  bottom: 10px;
+  left: 70%;
+  color: #FFF;
+  font-size: 18px;
+  cursor: pointer;
+  transform: translateX(-50%);
+	}
+.register:hover {
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.5);
+  transform: translateX(-50%);
+}
+
+.invite {
+	background: -moz-linear-gradient(top, #ace, #f96 80%, #f96);
+	background: -webkit-linear-gradient(top,#ace,#f96 80%,#f96);
+	background: -o-linear-gradient(top, #ace, #f96 80%, #f96);
+  left: 50%;
+}
+
+.nope {
+  background: #999;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 21px;
+  outline: none;
+  overflow: hidden;
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  color: #FFF;
+  font-size: 18px;
+  cursor: pointer;
+  transform: translateX(-50%);
+}
+.nope:hover {
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.8);
+  transform: translateX(-50%);
+}
+
+.open {
+  background: #CCC;
+  height: 45px;
+  width: 150px;
+  padding: 10px 20px;
+  margin: auto;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  font-size: 20px;
+  text-align: center;
+  white-space: nowrap;
+  cursor: pointer;
+  opacity: 0;
+  visibility: hidden;
+}
+.open.active {
+  opacity: 1;
+  visibility: visible;
+}
+.open:hover {
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+

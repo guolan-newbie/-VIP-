@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>    
+  <datas>
+  	<normal>
+      <totalamount>8500</totalamount>
+      <firstamount>1500</firstamount>
+      <monthlyforstudent>100</monthlyforstudent>
+      <monthlyforworker>1000</monthlyforworker>
+    </normal>
+  	<abnormal>
+      <totalamount>8000</totalamount>
+      <firstamount>500</firstamount>
+      <monthlyforstudent>0</monthlyforstudent>
+      <monthlyforworker>500</monthlyforworker>
+    </abnormal>
+  </datas>   

@@ -1,0 +1,178 @@
+.commentcdiv{
+	background-color: #FFFFFF;
+	 width: 600px;
+	 position: relative;
+	 left: 95px;
+	 margin-top:5px;
+	 border-radius: 5px;
+}
+	 /* 
+	 * �޸ģ����username,commentcdivseatprovince,commentcdivprovince��ʽ;
+	 *		�޸�commentcdivname,commentcdivtime,commentcdivassistant��ʽʹ�����½���ƥ��
+	 * ���ߣ����±�
+	 * ���ڣ�2016-10-13 
+	 */
+.username{
+	font-weight: 600;
+	position: relative;
+	top: 19px;
+	left: 20px;
+}
+.commentcdivname{
+	position: relative;
+	font-weight: 600;
+	top: 19px;
+	left: 30px;
+}
+.commentcdivtime{
+	position: relative;
+	font-weight: 600;
+	top: 19px;
+	left: 40px;
+}
+.commentcdivseatprovince{
+	position: relative;
+	font-weight: 600;
+	top: 19px;
+	left: 50px;
+}
+.commentcdivprovince{
+	position: relative;
+	font-weight: 600;
+	top: 19px;
+	left: 60px;
+}
+.commentcdivassistant{
+	position: relative;
+	top: 50px;
+	left:-170px;
+	font-size:13px;
+	color:#1C86EE;
+}
+.commtent{
+	background-color:#FFFFFF;
+	width:530px;
+	position: relative;
+	left: 35px;
+}
+.cont{
+	width:530px;
+	position:relative;
+	top:10px;
+	background-color:#FFFFFF;
+	line-height:27px;
+}
+.approvedi{
+	width: 600px;
+	margin-left: 95px;
+}
+.approvedidiv{
+	position: relative;
+	float: right;
+	margin-right: 20px;
+	top: 5px;
+}
+.commcontendiv{
+	width: 600px;
+	background-color: #CCCCCC;
+	margin-left: 95px;
+}
+.commcontendivtd{
+	width: 600px;
+	height: 50px;
+	background-color:#FFFFFF;
+	border-radius: 5px;
+}
+.commcontendivtdspan{
+	font-size: 16px;
+	font-weight: 600;
+	position: relative;
+	left: 20px;
+	top: 15px;
+}
+.commcontendivnocd{
+	margin-left: -55px;
+}
+.commcontendivnocdind{
+	width: 600px;
+	margin-left: 55px;
+	background-color: #FFFFFF;
+	border-radius: 5px;
+	text-align: center;
+}
+.commcontendivnocdinddi{
+	width: 550px;
+	position: relative;
+	left: 30px;
+}
+.commcontendivnocdinddisp{
+	font-size: 18px;
+	font-weight: 600;
+	color: red;
+}
+.commcontendivcod{
+	margin-left: -55px;
+	margin-top: 13px;
+}
+.commcontendivcod2{
+	margin-left: -55px;
+	margin-top: 13px;
+}
+
+
+.commcontendivcods{
+	position: relative;
+	bottom: 8px;
+	left: 85px;
+}
+.commcontendivcodsins{
+	position: relative;
+	bottom: 8px;
+	left: 85px;
+	font-size: 10px;
+	color: #777777;
+}
+.icon-delete-small{
+	position: relative;
+	bottom: 8px;
+	left: 470px;
+}
+.icon-update-small
+{
+	position: relative;
+	bottom: 8px;
+	left: 420px;
+}
+.commcontendivcodss{
+	color: #FFFFFF;
+	position: relative;
+	top: 9px;
+	left: -70px;
+}
+.commcontendivcodd{
+	width: 600px;
+	margin-left: 55px;
+	background-color: #FFFFFF;
+	border-radius: 5px;
+}
+.commcontendivcodd2{
+	width: 600px;
+	height:70px;
+	margin-left: 55px;
+	background-color: #FFFFFF;
+	border-radius: 5px;
+}
+.commcontendivcoddd{
+	width: 550px;
+	position: relative;
+	left: 30px;
+}
+.nocondiv{
+	padding-left:240px;
+}
+
+.nocontent{
+	font-size: 18px;
+	font-weight: 800;
+	color: #F43838;
+}

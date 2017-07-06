@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="mapper.DailyLogMapper">
+	<insert id="addDailyLog" parameterType="entity.DailyLog">
+		insert into
+		dailylog(name,time,context,created) values
+		(#{name},#{time},#{context},#{created})
+	</insert>
+	
+	<select id="getDailyLog" parameterType="entity.DailyLog" resultType="entity.DailyLog">
+		SELECT
+			id,
+			NAME,
+			time,
+			created
+		FROM
+			dailylog
+		WHERE
+			time &lt;= #{time}
+		<if test="name != null and name != '所有人'.toString()">
+		AND
+			name = #{name}
+		</if>
+		ORDER BY
+			time desc,
+			id DESC
+	</select>
+	
+	<select id="getDailyLogById" resultType="entity.DailyLog">
+		SELECT
+			*
+		FROM
+			dailylog
+		WHERE
+			id = #{id}
+	</select>
+	
+	<select id="checkDailyLog" parameterType="entity.DailyLog" resultType="boolean">
+	<![CDATA[
+		SELECT
+			COUNT(*)
+		FROM
+			dailylog
+		WHERE
+			name = #{name}
+		AND
+			time = #{time}
+	]]>
+	</select>
+	<update id="modifyDailyLog" parameterType="entity.DailyLog">
+	UPDATE dailylog SET context=#{context} ,time=#{time} WHERE id=#{id}
+	</update>
+	<delete id="deleteDailyLog" parameterType="int">
+	DELETE FROM dailylog  WHERE id=#{id}
+	</delete>
+	<select id="getDailyLogTimeByName" parameterType="entity.DailyLog" resultType="entity.DailyLog">
+	SELECT time FROM dailylog WHERE name=#{name} AND id!=#{id}
+	</select>
+</mapper>

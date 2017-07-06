@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="mapper.InterestMapper">	
+	<insert id="add" parameterType="entity.Interest" useGeneratedKeys="true" keyProperty="id">
+		insert into interest(pid,aid,money,amount) values (#{period.id},#{accountLog.id},#{money},#{amount})
+	</insert>
+	<select id="getInterest" parameterType="entity.Period" resultType="Float">
+		select COALESCE(SUM(amount),0) from interest where pid=#{id}
+	</select>
+	<select id="getAllInterest" parameterType="int" resultType="Float">
+		select 
+				COALESCE(SUM(i.amount),0)
+			from
+				period p
+			join
+				interest i
+			on
+				p.id=i.pid
+			where
+				p.mid=#{mid}
+	</select>	
+	<select id="getInterestDetailByPage" parameterType="dto.InterestDTO" resultType="entity.InterestDetail">
+		select * from interestdetail where mid=#{mid} order by p_duetime,a_date
+	</select>
+	<delete id="delByAid" parameterType="int">
+		delete from interest where aid=#{aid}
+	</delete>
+	<select id="getInterestDetailByMid" parameterType="int" resultType="entity.InterestDetail">
+		select * from interestdetail where mid=#{mid} order by p_duetime,a_date
+	</select>
+</mapper>

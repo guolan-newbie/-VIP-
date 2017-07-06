@@ -1,0 +1,499 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="mapper.UserMapper">
+	<select id="getValid" parameterType="entity.User" resultMap="userinfo">
+	    select 
+	    	newuser.id id,newuser.name name,pwd,salt,registerTime,mid,aid,realName,sex,school,
+	    	company,mobile,student,graduateDate,joinTime,abnormal,flag,
+	    	alog,restAmount,restInterest,fee,provid,summaryflag,seat_provid,periodStatus,
+	    	iid,idNo,qqNo,payAccount,contactName,relation,contactMobile,address,
+	    	p.id pid,p.name pname
+	    from(
+			select 
+					u.id			id,
+					u.name 			name,
+					u.pwd			pwd,
+					u.salt			salt,				
+					u.time			registerTime,
+					u.noticeTime	noticeTime,
+					m.id			mid,
+					m.aid			aid,
+					m.name 			realName,
+					m.sex  			sex,
+					m.school		school,
+					m.company		company,
+					m.mobile		mobile,
+					m.student		student,
+					m.graduateDate	graduateDate,
+					m.time			joinTime,
+					m.abnormal		abnormal,
+					m.flag			flag,
+					m.alog			alog,
+					m.restAmount	restAmount,
+					m.restInterest	restInterest,
+					m.fee			fee,
+					m.provid        provid,
+					m.summaryflag	summaryflag,
+					m.seat_provid   seat_provid,
+					m.periodStatus  periodStatus,
+					i.id            iid,
+					i.idNo          idNo,
+					i.qqNo          qqNo,
+					i.payAccount    payAccount,
+					i.contactName   contactName,
+					i.relation      relation,
+					i.contactMobile contactMobile,
+					i.address       address
+			 from user u ,member m,userinfo i
+			where u.id = m.uid and u.name=#{name} and u.pwd=#{pwd} and u.id=i.uid
+			)newuser
+			left join
+				province p
+			on
+				provid = p.id
+			where 
+				provid = p.id
+			
+	</select>
+	
+	<select id="checkValid" parameterType="entity.User" resultType="entity.User">
+		select * from user where name=#{name} and pwd=#{pwd}
+	</select>
+	<select id="getMemberInfo" parameterType="entity.User" resultMap="memberinfo">
+				select 	
+						u.id			id,
+						u.name 			name,
+						u.pwd			pwd,
+						u.salt			salt,				
+						u.time			registerTime,
+						u.noticeTime	noticeTime,
+						m.id			mid,
+						m.aid			aid,
+						m.name 			realName,
+						m.sex  			sex,
+						m.school		school,
+						m.company		company,
+						m.mobile		mobile,
+						m.student		student,
+						m.graduateDate	graduateDate,
+						m.time			joinTime,
+						m.abnormal		abnormal,
+						m.flag			flag,
+						m.alog			alog,
+						m.restAmount	restAmount,
+						m.restInterest	restInterest,
+						m.fee			fee,
+						m.provid        provid,
+						m.summaryflag	summaryflag
+						from user u,member m 
+						where u.id=m.uid 
+						and u.name=#{name} 
+						and u.pwd=#{pwd}
+				
+	</select>
+	
+	<select id="getSalt" parameterType="entity.User" resultType="String">
+		select salt from user where name=#{name}
+	</select>
+	
+	<select id="getExist" parameterType="entity.User" resultType="entity.User">
+		select * from user where name=#{name}
+	</select>
+		<!--
+		type=0表示提取所有数据
+		type=1表示提取指定id为指定no的数据
+		type=2表示提取所有需要审核的数据
+		type=3表示提取所有需要缴费的数据
+		type=4表示提取所有已审核的用户  王冰冰20151203
+		-->
+	<select id="getUser" resultMap="userinfo" parameterType="entity.QueryType">
+			select
+				u.id			id,
+				u.name 			name,
+				u.time			registerTime,
+				m.id			mid,
+				m.name 			realName,
+				m.sex  			sex,
+				m.school		school,
+				m.company		company,
+				m.mobile		mobile,
+				m.student		student,
+				m.graduateDate	graduateDate,
+				m.time			joinTime,
+				m.abnormal		abnormal,
+				m.flag			flag,
+				m.alog			alog,
+				m.restAmount	restAmount,
+				m.restInterest	restInterest,
+				m.fee			fee,
+				m.provid        provid,
+				m.summaryflag	msummaryflag,
+				m.periodStatus periodStatus,
+				i.id            iid,
+				i.idNo          idNo,
+				i.qqNo          qqNo,
+				i.payAccount    payAccount,
+				i.contactName   contactName,
+				i.relation      relation,
+				i.contactMobile contactMobile,
+				i.address       address
+			from 
+				user u,member m,userinfo i
+			where 1=1
+			<if test="type==1"> 
+				and u.id=#{no}
+			</if>
+			<if test="type==2"> 
+				and flag=0
+			</if>
+			<if test="type==3"> 
+				and fee=0
+				and flag=1
+			</if>
+			<!--王冰冰20151203 -->
+			<if test="type==4"> 
+				and flag=1
+			</if>			
+			and u.id=m.uid
+			and u.id=i.uid
+			order by name
+	</select>
+		<select id="getUserByPage" resultMap="userinfo" parameterType="dto.UserDTO">
+			SELECT 
+			ctable.id id,
+			ctable.name name,
+			ctable.registerTime registerTime,
+			ctable.mid mid,
+			ctable.realName realName,
+			ctable.sex sex,
+			ctable.school school,
+			ctable.company company,
+			ctable.mobile mobile,
+			ctable.student student,
+			ctable.graduateDate graduateDate,
+			ctable.joinTime joinTime,
+			ctable.abnormal abnormal,
+			ctable.flag flag,
+			ctable.alog alog,
+			ctable.restAmount restAmount,
+			ctable.restInterest restInterest,
+			ctable.fee fee,
+			ctable.provid provid,
+			ctable.maid maid,
+			ctable.meid meid,
+			ctable.msummaryflag msummaryflag,
+			ctable.iid            iid,
+			ctable.idNo          idNo,
+			ctable.qqNo          qqNo,
+			ctable.payAccount    payAccount,
+			ctable.contactName   contactName,
+			ctable.relation      relation,
+			ctable.contactMobile contactMobile,
+			ctable.address       address, 
+			ctable.aid aid,
+			ctable.arealname arealname,
+			e.id eid,
+			e.name ename
+			FROM(
+					SELECT
+					atable.id id,
+					atable.name name,
+					atable.registerTime registerTime,
+					atable.mid mid,
+					atable.realName realName,
+					atable.sex sex,
+					atable.school school,
+					atable.company company,
+					atable.mobile mobile,
+					atable.student student,
+					atable.graduateDate graduateDate,
+					atable.joinTime joinTime,
+					atable.abnormal abnormal,
+					atable.flag flag,
+					atable.alog alog,
+					atable.restAmount restAmount,
+					atable.restInterest restInterest,
+					atable.fee fee,
+					atable.provid provid,
+					atable.maid maid,
+					atable.meid meid,
+					atable.msummaryflag msummaryflag,
+					atable.iid            iid,
+					atable.idNo          idNo,
+					atable.qqNo          qqNo,
+					atable.payAccount    payAccount,
+					atable.contactName   contactName,
+					atable.relation      relation,
+					atable.contactMobile contactMobile,
+					atable.address       address, 
+					a.id aid,
+					a.realname arealname
+					FROM (
+									SELECT 
+									btable.id id,
+									btable.name name,
+									btable.registerTime registerTime,
+									btable.mid mid,
+									btable.realName realName,
+									btable.sex sex,
+									btable.school school,
+									btable.company company,
+									btable.mobile mobile,
+									btable.student student,
+									btable.graduateDate graduateDate,
+									btable.joinTime joinTime,
+									btable.abnormal abnormal,
+									btable.flag flag,
+									btable.alog alog,
+									btable.restAmount restAmount,
+									btable.restInterest restInterest,
+									btable.fee fee,
+									btable.provid provid,
+									btable.maid maid,
+									btable.meid meid,
+									btable.msummaryflag msummaryflag,
+									i.id            iid,
+									i.idNo          idNo,
+									i.qqNo          qqNo,
+									i.payAccount    payAccount,
+									i.contactName   contactName,
+									i.relation      relation,
+									i.contactMobile contactMobile,
+									i.address       address
+									FROM (SELECT 
+												u.id id,
+												u.name name,
+												u.time registerTime,
+												m.id mid,
+												m.name realName,
+												m.sex sex,
+												m.school school,
+												m.company company,
+												m.mobile mobile,
+												m.student student,
+												m.graduateDate graduateDate,
+												m.time joinTime,
+												m.abnormal abnormal,
+												m.flag flag,
+												m.alog alog,
+												m.restAmount restAmount,
+												m.restInterest restInterest,
+												m.fee fee,
+												m.provid provid,
+												m.aid maid,
+												m.eid meid,
+												m.summaryflag msummaryflag
+												FROM 
+												user u,member m
+												WHERE 1=1	
+												<if test="type==1"> 
+													and u.id=#{no}
+												</if>
+												<if test="type==2"> 
+													and flag=0
+												</if>
+												<if test="type==3"> 
+													and fee=0
+												</if>
+												<!--王冰冰20151203 -->
+												<if test="type==4"> 
+													and flag=1
+												</if>
+												<if test="type==5"> 
+													and fee=1
+												</if>	
+												<if test="type==6"> 
+													and alog &gt; 0
+												</if>
+												AND u.id=m.uid
+												) btable
+									LEFT JOIN userinfo i
+									ON btable.id=i.uid
+									) atable
+					LEFT JOIN admin a
+					ON a.id=atable.maid)ctable
+		LEFT JOIN experience e
+		ON ctable.meid=e.id
+		ORDER BY `name`
+	</select>
+	<update id="update" parameterType="entity.User">
+		update user set pwd=#{pwd},salt=#{salt},root=#{root} where id=#{id}
+	</update>	
+	<update id="updatefinish" parameterType="entity.User">
+		update user set finish=#{finish} where id=#{id}
+	</update>	
+	<insert id="add" parameterType="entity.User"  useGeneratedKeys="true" keyProperty="id">
+		insert into user(name,pwd,salt,time,root) values (#{name},#{pwd},#{salt},#{time},#{root})
+	</insert> 
+	<select id="getLastOne"  resultType="entity.User">
+		select   *   from   `user`   order   by   id   desc   limit  1 
+	</select>
+	<select id="getUserById" parameterType="int" resultType="entity.User">
+		select * from user where id=#{id}
+	</select>
+	<select id="getUserByName" parameterType="String" resultType="entity.User">
+		select * from user where name=#{name}
+	</select>
+	<resultMap type="entity.User" id="userinfo">
+		<id column="id" property="id"/>
+		<result column="name" property="name"/>
+		<result column="pwd" property="pwd"/>
+		<result column="salt" property="salt"/>
+		<result column="registerTime" property="time"/>
+		<result column="noticeTime" property="noticeTime"/>	
+		<association property="admin" javaType="entity.Admin">
+			<id column="aid" property="id"/>
+			<result column="arealname" property="realname"/>
+		</association>
+		<association property="experience" javaType="entity.Experience">
+			<id column="eid" property="id"/>
+			<result column="ename" property="name"/>
+		</association>
+		<collection property="member" ofType="entity.Member">
+			<id column="mid" property="id"/>
+			<result column="aid" property="aid"/>
+			<result column="realName" property="name"/>
+			<result column="sex" property="sex"/>
+			<result column="school" property="school"/>
+			<result column="company" property="company"/>
+			<result column="mobile" property="mobile"/>
+			<result column="student" property="student"/>
+			<result column="graduateDate" property="graduateDate"/>
+			<result column="joinTime" property="time"/>
+			<result column="abnormal" property="abnormal"/>
+			<result column="flag" property="flag"/>
+			<result column="alog" property="alog"/>
+			<result column="restAmount" property="restAmount"/>
+			<result column="restInterest" property="restInterest"/>
+			<result column="fee" property="fee"/>
+			<result column="provid" property="provid" />
+			<result column="seat_provid" property="seat_provid"/>
+			<result column="periodStatus" property="periodStatus"/>
+			<result column="msummaryflag" property="summaryflag" />
+				<association property="province" javaType="entity.Province">
+					<id column="pid" property="id"/>
+					<result column="pname" property="name"/>
+				</association>
+				<association property="userInfo" javaType="entity.UserInfo">
+					<id column="iid" property="id"/>
+					<result column="idNo" property="idNo"/>
+					<result column="qqNo" property="qqNo"/>
+					<result column="payAccount" property="payAccount"/>
+					<result column="contactName" property="contactName"/>
+					<result column="contactMobile" property="contactMobile"/>
+					<result column="relation" property="relation"/>
+					<result column="address" property="address"/>
+				</association>
+		</collection>
+		<collection property="userInfo" ofType="entity.UserInfo">
+			<id column="iid" property="id"/>
+			<result column="idNo" property="idNo"/>
+			<result column="qqNo" property="qqNo"/>
+			<result column="payAccount" property="payAccount"/>
+			<result column="contactName" property="contactName"/>
+			<result column="contactMobile" property="contactMobile"/>
+			<result column="relation" property="relation"/>
+			<result column="address" property="address"/>
+		</collection>
+	</resultMap>
+	<resultMap type="entity.User" id="memberinfo">
+		<id column="id" property="id"/>
+		<result column="name" property="name"/>
+		<result column="pwd" property="pwd"/>
+		<result column="salt" property="salt"/>
+		<result column="registerTime" property="time"/>
+		<result column="noticeTime" property="noticeTime"/>	
+		<collection property="member" ofType="entity.Member">
+			<id column="mid" property="id"/>
+			<result column="aid" property="aid"/>
+			<result column="realName" property="name"/>
+			<result column="sex" property="sex"/>
+			<result column="school" property="school"/>
+			<result column="company" property="company"/>
+			<result column="mobile" property="mobile"/>
+			<result column="student" property="student"/>
+			<result column="graduateDate" property="graduateDate"/>
+			<result column="joinTime" property="time"/>
+			<result column="abnormal" property="abnormal"/>
+			<result column="flag" property="flag"/>
+			<result column="alog" property="alog"/>
+			<result column="restAmount" property="restAmount"/>
+			<result column="restInterest" property="restInterest"/>
+			<result column="fee" property="fee"/>
+			<result column="provid" property="provid" />
+			<result column="msummaryflag" property="summaryflag" />
+		</collection>
+
+	</resultMap>
+	<select id="getAll" resultType="entity.User">
+		select * from user
+	</select>
+	<select id="getInfo" resultMap="restinfo" >
+		select id,name,u1.qq qq,mobile,restInterest,u1.uid uid,u2.uname uname
+			from member
+				left join
+					(
+					select 					
+						uid uid,
+						qqNo qq
+					from userinfo
+					) u1
+			on 
+				u1.uid=member.uid
+				LEFT JOIN
+				(
+					SELECT
+           id uid, 
+					 name uname
+          FROM `user`
+				)u2
+			ON
+				u2.uid=member.uid
+			where
+				member.fee=1
+	</select>
+	<select id="getInfoByPage" resultMap="restinfo" parameterType="dto.UserDTO">
+		select id,name,u1.qq qq,mobile,restInterest,u1.uid uid,u2.uname uname
+			from member
+				left join
+					(
+					select 					
+						uid uid,
+						qqNo qq
+					from userinfo
+					) u1
+			on 
+				u1.uid=member.uid
+				LEFT JOIN
+				(
+					SELECT
+           id uid, 
+					 name uname
+          FROM `user`
+				)u2
+			ON
+				u2.uid=member.uid
+			where
+				member.fee=1
+	</select>
+	<delete id="deleteById">	
+		delete user,member from user,member where user.id=member.uid and user.id=#{id};
+	</delete>
+	<resultMap type="entity.User" id="restinfo">
+		<id column="uid" property="id"/>
+		<result column="uname" property="name"/>
+		<collection property="member" ofType="entity.Member">
+			<id column="id" property="id"/>
+			<result column="name" property="name"/>
+			<result column="mobile" property="mobile"/>
+			<result column="restInterest" property="restInterest"/>
+		</collection>
+		<collection property="userInfo" ofType="entity.UserInfo">
+			<id column="uid" property="id"/>
+			<result column="qq" property="qqNo"/>
+		</collection>
+
+	</resultMap>
+</mapper>

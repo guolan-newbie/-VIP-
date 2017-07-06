@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="mapper.CommunicationMapper">
+	<insert id="add" parameterType="entity.Communication" useGeneratedKeys="true" keyProperty="id">
+		insert into communication(
+								mid,
+								eid,
+								aid,
+								cid,
+								time,
+								content
+								) values (
+								#{mid},
+								#{eid},
+								#{aid},
+								#{cid},
+								#{time},
+								#{content}
+								)
+	</insert>
+	<select id="getCommunicationByEid" resultMap="communication" parameterType="int">
+			SELECT 
+			c.id cid,
+			c.eid ceid,
+			c.aid caid,
+			c.time ctime,
+			c.content ccontent, 
+			a.id aid,
+			a.realname arealname 
+			FROM communication c,admin a
+			WHERE c.aid=a.id AND eid=#{eid}
+			ORDER BY ctime DESC
+	</select>
+	<select id="getCommunicationByMid" resultMap="communication" parameterType="int">
+			SELECT 
+			c.id cid,
+			c.eid ceid,
+			c.aid caid,
+			c.time ctime,
+			c.content ccontent, 
+			a.id aid,
+			a.realname arealname 
+			FROM communication c,admin a
+			WHERE c.aid=a.id AND mid=#{mid}
+			ORDER BY ctime DESC
+	</select>
+	<select id="getCommunicationInfoByPage" resultMap="getallCommunication" parameterType="dto.CommunicationDTO">
+			SELECT
+			tableb.cid cid,
+			tableb.cmid cmid,
+			tableb.ceid ceid,
+			tableb.caid caid,
+			tableb.ctime ctime,
+			tableb.ccontent ccontent, 
+			tableb.aid aid,
+			tableb.arealname arealname,
+			tableb.mname mname,
+			e.`name` ename
+			FROM(
+						SELECT 
+						tablea.cid cid,
+						tablea.cmid cmid,
+						tablea.ceid ceid,
+						tablea.caid caid,
+						tablea.ctime ctime,
+						tablea.ccontent ccontent, 
+						tablea.aid aid,
+						tablea.arealname arealname,
+						m.`name` mname
+						FROM(			
+									SELECT 
+									c.id cid,
+									c.mid cmid,
+									c.eid ceid,
+									c.aid caid,
+									c.time ctime,
+									c.content ccontent, 
+									a.id aid,
+									a.realname arealname
+									FROM communication c,admin a
+									WHERE c.aid=a.id and (c.eid !=0 or c.mid !=0 ))tablea 
+						LEFT JOIN member m
+						ON  tablea.cmid=m.id)tableb
+			LEFT JOIN experience e
+			ON tableb.ceid=e.id
+			ORDER BY ctime DESC
+	</select>
+	<select id="getCommunicationByCid" resultMap="communication" parameterType="int">
+			SELECT 
+			c.id cid,
+			c.eid ceid,
+			c.aid caid,
+			c.cid ccid,
+			c.time ctime,
+			c.content ccontent, 
+			a.id aid,
+			a.realname arealname 
+			FROM communication c,admin a
+			WHERE c.aid=a.id AND cid=#{cid}
+			ORDER BY ctime DESC
+	</select>
+	
+	<delete id="deleteClueCommunication">
+		DELETE
+		FROM
+			communication
+		WHERE
+			cid = #{cid}
+	</delete>
+
+	<delete id="deleteById">
+		DELETE
+		FROM
+			communication
+		WHERE
+			id = #{id}
+	</delete>
+
+	<resultMap type="entity.Communication" id="communication">
+		<id column="cid" property="id"/>
+		<result column="ceid" property="eid"/>
+		<result column="caid" property="aid"/>
+		<result column="ctime" property="time"/>
+		<result column="ccontent" property="content"/>
+		<association property="admin" javaType="entity.Admin">
+			<id column="aid" property="id"/>
+			<result column="arealname" property="realname"/>
+		</association>	
+	</resultMap>
+	
+		<resultMap type="entity.Communication" id="getallCommunication">
+		<id column="cid" property="id"/>
+		<result column="cmid" property="mid"/>
+		<result column="ceid" property="eid"/>
+		<result column="caid" property="aid"/>
+		<result column="ctime" property="time"/>
+		<result column="ccontent" property="content"/>
+		<association property="admin" javaType="entity.Admin">
+			<id column="aid" property="id"/>
+			<result column="arealname" property="realname"/>
+		</association>	
+		<association property="member" javaType="entity.Member">
+			<id column="cmid" property="id"/>
+			<result column="mname" property="name"/>
+		</association>
+		<association property="experience" javaType="entity.Experience">
+			<id column="ceid" property="id"/>
+			<result column="ename" property="name"/>
+		</association>
+	</resultMap>
+</mapper>
